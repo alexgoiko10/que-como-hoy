@@ -52,11 +52,6 @@ button{cursor:pointer}
 
 header.top{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:12px 24px;margin-bottom:16px}
 .sync{font-size:12px;color:var(--muted)}
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:16px}
-.stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:10px 14px;display:flex;flex-direction:column;gap:2px;min-width:0}
-.stat b{font-family:var(--f-display);font-size:22px;font-variant-numeric:tabular-nums}
-.stat.warn{background:var(--warn-soft);border-color:transparent}
-.stat.warn b{color:var(--warn)}
 
 nav.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);display:flex;gap:4px;padding-block:8px;border-bottom:1px solid var(--line);margin-bottom:18px;overflow-x:auto}
 nav.tabs button{border:0;background:transparent;padding:8px 14px;border-radius:999px;font-weight:600;color:var(--muted);white-space:nowrap}
@@ -185,11 +180,6 @@ section.block{display:flex;flex-direction:column;gap:12px;margin-bottom:28px}
   nav.tabs{position:fixed;top:auto;bottom:0;left:0;right:0;margin:0;border-bottom:0;border-top:1px solid var(--line);background:var(--surface);
     padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px));display:grid;grid-template-columns:repeat(5,1fr);gap:2px;overflow:visible}
   nav.tabs button{padding:10px 2px;font-size:12.5px;border-radius:10px;text-transform:capitalize}
-  .stats{grid-template-columns:repeat(2,1fr);gap:8px}
-  .stat{padding:8px 12px}
-  .stat b{font-size:19px}
-  .stat:nth-child(3){display:none}
-  .stat:nth-child(4){grid-column:1/-1}
   input,select,textarea{font-size:16px!important}
   .btn.sm{padding:7px 12px}
   .ico{padding:6px 10px;font-size:13px}
@@ -209,7 +199,6 @@ section.block{display:flex;flex-direction:column;gap:12px;margin-bottom:28px}
     </div>
     <div class="sync" id="sync">Se guarda en este dispositivo</div>
   </header>
-  <div class="stats" id="stats"></div>
   <nav class="tabs" role="tablist" id="tabs">
     <button role="tab" data-tab="hoy" aria-selected="true">Hoy</button>
     <button role="tab" data-tab="especial" aria-selected="false">Recetas</button>
@@ -243,7 +232,8 @@ const ING = {
   mantequilla:["Mantequilla","lac"], leche:["Leche","lac"], harina:["Harina","esp"], levadura:["Levadura de panadería","esp"], azucar:["Azúcar","esp"], miel:["Miel","otros"], mostaza:["Mostaza","otros"], vino:["Vino (blanco o tinto)","esp"],
   parmesano:["Parmesano","esp"], gorgonzola:["Gorgonzola","esp"], qcabra:["Rulo de cabra","esp"], mascarpone:["Mascarpone","esp"], nueces:["Nueces","esp"], coco:["Leche de coco","esp"], currorojo:["Pasta de curry rojo","esp"],
   esparragos:["Espárragos verdes","esp"], padron:["Pimientos de Padrón","esp"], rucula:["Rúcula","esp"], pina:["Piña","esp"], frutosrojos:["Frutos rojos","esp"], romero:["Romero","esp"], guindilla:["Guindilla","esp"],
-  brioche:["Pan brioche","esp"], lasana:["Placas de lasaña","esp"], gnocchi:["Gnocchi","esp"], chocolate:["Chocolate negro","esp"], bizcochos:["Bizcochos de soletilla","esp"], cafe:["Café","esp"], cacao:["Cacao en polvo","esp"]
+  brioche:["Pan brioche","esp"], lasana:["Placas de lasaña","esp"], gnocchi:["Gnocchi","esp"], chocolate:["Chocolate negro","esp"], bizcochos:["Bizcochos de soletilla","esp"], cafe:["Café","esp"], cacao:["Cacao en polvo","esp"],
+  bacalao:["Bacalao desalado","prot"], piquillo:["Pimientos del piquillo","veg"], pulpo:["Pulpo cocido","esp"], costillas:["Costillas de cerdo","esp"]
 };
 GROUPS.esp = "Para recetas especiales";
 GROUPS.mine = "Añadidos por ti";
@@ -266,7 +256,30 @@ const SP = [
  ["s14","Tortilla de patatas de verdad","huevo","f",45,["patatas","huevos","cebolla"],["Patata en láminas y cebolla, confitadas en aceite abundante a fuego medio 25 min.","Escurre y mezcla con 5 huevos batidos y sal. Reposa 5 min.","Cuaja a fuego fuerte 1 min, dale la vuelta, otro minuto.","Jugosa por dentro."],"El reposo con el huevo es lo que la hace jugosa. No te lo saltes."],
  ["s15","Magret de pato con frutos rojos","carne","p",35,["magret","frutosrojos","miel","patatas"],["Haz cortes en rombo en la grasa. Sartén en frío, piel abajo, 10 min a fuego medio.","Vuelta y 3-4 min más. Reposa 5 min.","En la grasa: frutos rojos, 1 cucharada de miel y un chorro de vino. Reduce.","Sirve en láminas con patatas panaderas o puré."],"Punto rosado por dentro: es como mejor está."],
  ["s16","Coulant de chocolate","postre","p",25,["chocolate","mantequilla","huevos","azucar","harina"],["Funde 100 g chocolate y 80 g mantequilla.","Bate 2 huevos con 60 g azúcar, añade el chocolate y 30 g harina.","Reparte en 2 moldes engrasados. Se puede dejar preparado en la nevera.","Horno 200 °C 8-9 min. Desmolda y sirve caliente."],"Hazlo antes de cenar y hornéalo mientras recogéis la mesa."],
- ["s17","Tiramisú exprés","postre","pf",20,["mascarpone","bizcochos","cafe","huevos","azucar","cacao"],["Bate 2 yemas con 50 g azúcar, añade 250 g mascarpone.","Monta las 2 claras a punto de nieve y mézclalas con cuidado.","Moja los bizcochos en café frío y alterna capas con la crema.","Nevera mínimo 3 h y cacao por encima al servir."],"Hazlo en 2 vasos individuales: queda más bonito."]
+ ["s17","Tiramisú exprés","postre","pf",20,["mascarpone","bizcochos","cafe","huevos","azucar","cacao"],["Bate 2 yemas con 50 g azúcar, añade 250 g mascarpone.","Monta las 2 claras a punto de nieve y mézclalas con cuidado.","Moja los bizcochos en café frío y alterna capas con la crema.","Nevera mínimo 3 h y cacao por encima al servir."],"Hazlo en 2 vasos individuales: queda más bonito."],
+ ["s18","Pulpo a la gallega con cachelos","pescado","pf",30,["pulpo","patatas"],["Cuece las patatas con piel en rodajas gruesas 15-18 min en agua con sal.","Calienta el pulpo cocido 2 min en esa misma agua.","Córtalo con tijera sobre las patatas.","Sal gorda, pimentón dulce y picante y un buen chorro de aceite."],"Sírvelo en tabla de madera: es como se come en Galicia."],
+ ["s19","Costillas al horno con barbacoa","carne","f",90,["costillas","barbacoa","miel","patatas"],["Salpimenta las costillas y envuélvelas en papel de aluminio.","Horno a 160 °C 60 min.","Destapa, píntalas con barbacoa y miel y sube a 220 °C 15 min, pintando otra vez a mitad.","Patatas en gajos en la misma bandeja los últimos 30 min."],"Deben despegarse del hueso solas. Servilletas de sobra."],
+ ["s20","Presa ibérica con puré de boniato","carne","p",35,["secreto","boniato","mantequilla","miel","mostaza"],["Boniato en dados cocido 15 min y aplastado con mantequilla, sal y pimienta.","Presa o secreto a la plancha muy caliente 3-4 min por lado, sal gorda.","Salsa: 1 cucharada de miel y 1 de mostaza con un chorrito de agua caliente.","Reposa la carne 3 min y córtala en tiras."],"Una lágrima de salsa en el plato y la carne encima del puré."],
+ ["s21","Paella de pollo y verduras","arroz","f",60,["arroz","muslos","judias","pimiento","tomate","caldo"],["Dora bien el pollo troceado en la paellera con sal, 10 min.","Añade judías y pimiento, 5 min, y luego el tomate rallado con pimentón.","Arroz (80 g por persona), 1 min, y caldo caliente (el triple). Fuego fuerte 10 min y suave 8 min, sin remover.","Reposa 5 min tapada con un paño."],"Los últimos 2 min a fuego fuerte para el socarrat: suena a crujir."],
+ ["s22","Arroz meloso de gambas","arroz","p",40,["arroz","gambas","cebolla","triturado","caldo","vino"],["Pela las gambas; dora cabezas y cáscaras, añade el caldo y deja 10 min. Cuela.","Sofríe la cebolla, añade el tomate y un chorro de vino.","Arroz, 1 min, y el caldo caliente poco a poco, 18 min.","Las gambas peladas los últimos 2 min."],"Que quede meloso, entre caldoso y seco: recién hecho."],
+ ["s23","Bacalao con pisto","pescado","pf",40,["bacalao","pimiento","calabacin","cebolla","triturado"],["Pisto: cebolla, pimiento y calabacín en dados pochados 15 min.","Añade el tomate con una pizca de azúcar, 10 min.","Bacalao en lomos, piel arriba, sobre el pisto. Tapa 8 min a fuego suave.","Un chorrito de aceite crudo al servir."],"Pon el pisto en un aro y el lomo de bacalao encima."],
+ ["s24","Pollo tandoori al horno","pollo","f",50,["muslos","yogur","curry","limon","arroz"],["Marina los muslos con yogur, curry, pimentón, ajo, limón y sal (mejor 1 h, mínimo 15 min).","Horno a 220 °C 35-40 min.","Cuece el arroz.","Los últimos 3 min con grill."],"Sírvelo con cebolla roja en aros, lima y una salsa de yogur con pepino."],
+ ["s25","Albóndigas caseras en salsa","carne","f",60,["picada","huevos","pan_rallado","cebolla","vino","caldo","patatas"],["Mezcla carne, huevo, pan rallado, ajo, perejil y sal. Forma albóndigas.","Pásalas por harina y dóralas; sácalas.","Sofríe cebolla picada, añade vino y caldo y vuelve las albóndigas 20 min.","Tritura la salsa si la quieres fina. Con patatas fritas."],"Mejor al día siguiente: haz el doble y guarda."],
+ ["s26","Fajitas de entrecot con guacamole","carne","pf",35,["entrecot","tortillas","pimiento","cebolla","aguacate","lima"],["Guacamole: aguacate, lima, cebolla picada, sal y cilantro si tienes.","Entrecot a la plancha muy caliente 2 min por lado y reposa.","Saltea pimiento y cebolla en tiras con comino y pimentón.","Carne en tiras finas; que cada uno monte la suya."],"Calienta las tortillas en la sartén en seco justo antes de servir."],
+ ["s27","Ramen casero","carne","f",60,["noodles","lomo","huevos","caldo","soja","cebolleta","champis"],["Huevos 6 min 30 s y a agua fría; pélalos y déjalos en soja con agua 30 min.","Caldo con soja, jengibre y ajo, 15 min a fuego suave.","Lomo en tiras finas dorado; champiñones salteados.","Noodles en el bol, caldo caliente, carne, champiñones, huevo partido y cebolleta."],"La yema tiene que quedar líquida: controla el tiempo del huevo."],
+ ["s28","Musaka","carne","f",75,["berenjena","picada","triturado","cebolla","leche","mantequilla","harina","rallado"],["Berenjena en rodajas asadas al horno 15 min a 200 °C.","Carne con cebolla y tomate, canela y orégano, 15 min.","Bechamel: 30 g mantequilla, 30 g harina, 400 ml leche.","Capas de berenjena y carne, bechamel y queso. Horno 25 min a 190 °C."],"Reposo de 10 min antes de cortar para que salgan porciones limpias."],
+ ["s29","Linguine con gambas al ajillo","pasta","p",25,["pasta","gambas","ajo","cherry","guindilla","vino"],["Cuece la pasta.","Ajo laminado y guindilla en aceite a fuego suave; añade las gambas 1 min.","Chorro de vino blanco y los cherry partidos, 2 min.","Mezcla con la pasta y un poco de agua de cocción; perejil."],"Deja 2 gambas enteras con cabeza para decorar cada plato."],
+ ["s30","Croquetas de jamón","carne","f",90,["jamon","leche","harina","mantequilla","huevos","pan_rallado","cebolla"],["Pocha media cebolla muy picada en 70 g de mantequilla; añade el jamón picado.","70 g de harina, 2 min, y 700 ml de leche caliente poco a poco, removiendo 10 min.","Extiende la masa y enfríala en la nevera (mejor de un día para otro).","Forma, pasa por huevo y pan rallado y fríe en aceite muy caliente."],"Congela la mitad sin freír: tendrás croquetas para otro finde."],
+ ["s31","Pimientos rellenos de carne al horno","carne","f",60,["pimiento","picada","arroz","cebolla","frito","rallado"],["Cuece el arroz 10 min (queda a medias).","Sofríe cebolla y carne, añade tomate y el arroz.","Rellena los pimientos vaciados y ponles su tapa.","Horno a 190 °C 35 min; queso los últimos 5."],"Hazlos con pimientos de colores: rojos, amarillos y verdes."],
+ ["s32","Quiche de bacon y puerro","huevo","f",55,["hojaldre","bacon","puerro","huevos","nata","rallado"],["Forra un molde con la masa y pínchala.","Pocha el puerro y dora el bacon.","Mezcla 3 huevos, 200 ml de nata, queso, sal y nuez moscada; añade puerro y bacon.","Rellena y horno a 180 °C 30-35 min."],"Está buena caliente y fría: sirve para un picnic."],
+ ["s33","Crema de calabaza con queso de cabra","verdura","p",40,["calabaza","cebolla","qcabra","nueces","nata"],["Pocha la cebolla y añade la calabaza en dados, 5 min.","Cubre de agua o caldo y cuece 20 min.","Tritura con un chorro de nata.","Sirve con rodajas de rulo de cabra gratinado y nueces."],"Un hilo de miel sobre el queso de cabra lo hace de restaurante."],
+ ["s34","Tarta de queso cremosa","postre","f",60,["qcrema","nata","huevos","azucar","harina"],["Horno a 210 °C. Forra un molde con papel de horno arrugado.","Bate 500 g de queso crema, 200 g de azúcar, 4 huevos, 250 ml de nata y 1 cucharada de harina.","Hornea 35-40 min: tiene que quedar dorada por fuera y temblorosa en el centro.","Deja enfriar a temperatura ambiente y luego nevera."],"Mejor al día siguiente. El centro cremoso es lo que la hace especial."],
+ ["s35","Brownie de chocolate y nueces","postre","f",40,["chocolate","mantequilla","huevos","azucar","harina","nueces"],["Funde 150 g chocolate con 120 g mantequilla.","Bate 3 huevos con 150 g azúcar y mezcla con el chocolate.","Añade 70 g harina y las nueces troceadas.","Horno a 180 °C 20-25 min: el centro debe quedar algo húmedo."],"Sírvelo templado con una bola de helado de vainilla."],
+ ["s36","Torrijas","postre","f",30,["pan","leche","huevos","azucar"],["Infusiona la leche con canela y piel de limón y azúcar, 5 min.","Empapa rebanadas gruesas de pan del día anterior.","Pásalas por huevo batido y fríelas en aceite caliente.","Rebózalas en azúcar con canela."],"Aunque sean de Semana Santa, en otoño con un café saben igual de bien."],
+ ["s37","Arroz con leche","postre","f",50,["arroz","leche","azucar","limon"],["1 litro de leche con canela en rama y piel de limón. Que hierva.","Añade 100 g de arroz y cuece 35-40 min a fuego suave, removiendo a menudo.","Los últimos 5 min, 80 g de azúcar.","Enfría y espolvorea canela."],"Sírvelo en cuencos de barro."],
+ ["s38","Mousse de chocolate","postre","p",20,["chocolate","huevos","azucar"],["Funde 100 g de chocolate y deja templar.","Mezcla con 3 yemas.","Monta las 3 claras a punto de nieve con 30 g de azúcar e incorpóralas con cuidado.","Reparte en vasos y nevera 3 h."],"Unas escamas de sal por encima: contraste que sorprende."],
+ ["s39","Solomillo al whisky","carne","pf",30,["solomillo","ajo","caldo","patatas"],["Patatas fritas en dados o gajos.","Solomillo en medallones, dorado 2 min por lado y sácalo.","Dora 6 ajos laminados, añade un chorro de whisky (o vino), el zumo de medio limón y el caldo; reduce 5 min.","Vuelve la carne 1 min a la salsa."],"Con pan para mojar: la salsa es lo mejor."],
+ ["s40","Pollo al ajillo de toda la vida","pollo","f",45,["muslos","ajo","vino","patatas"],["Trocea los muslos pequeños y salpimienta.","Dóralos a fuego medio 15 min con una cabeza de ajos sin pelar, machacados.","Vino blanco y tapa 15 min a fuego suave.","Con patatas fritas o panaderas."],"Tomillo o laurel en la cazuela le dan el toque de casa."]
 ];
 // [id, nombre, categoría, c=comida n=cena, minutos, ingredientes, pasos]
 const R = [
@@ -344,7 +357,207 @@ const R = [
  ["r72","Ensalada de surimi y aguacate","pescado","n",10,["surimi","aguacate","lechuga","maiz"],["Surimi en tiras.","Aguacate en dados.","Mezcla todo sobre la lechuga con un poco de mayonesa o limón."]],
  ["r73","Bol de hummus con huevo y verduras","legumbre","n",10,["hummus","huevos","pepino","pan"],["Huevo cocido 10 min o a la plancha.","Extiende el hummus en un plato con pimentón y aceite.","Encima huevo y pepino; pan tostado para mojar."]],
  ["r74","Arroz salteado con edamame y huevo","legumbre","c",20,["edamame","arroz","huevos","soja"],["Cuece el arroz (o usa de ayer).","Saltea el edamame 3 min.","Añade huevo revuelto, arroz y soja."]],
- ["r75","Ensalada griega con feta","verdura","n",10,["feta","tomate","pepino","aceitunas","cebolla"],["Trocea tomate, pepino y cebolla.","Añade aceitunas y feta en dados.","Aceite, orégano y sal."]]
+ ["r75","Ensalada griega con feta","verdura","n",10,["feta","tomate","pepino","aceitunas","cebolla"],["Trocea tomate, pepino y cebolla.","Añade aceitunas y feta en dados.","Aceite, orégano y sal."]],
+ // Pollo
+ ["r76","Pollo al ajillo con patatas al micro","pollo","c",20,["pollo","ajo","patatas","perejil"],["Patatas en dados al micro 8 min con aceite y sal, luego a dorar en la sartén.","Dora el pollo en tacos con ajo laminado a fuego medio.","Junta todo con un chorrito de agua o vino y perejil picado."]],
+ ["r77","Pollo en salsa de tomate con arroz","pollo","c",20,["pollo","triturado","cebolla","arroz"],["Cuece el arroz.","Dora el pollo en tacos con la cebolla picada.","Añade el tomate con orégano, 10 min a fuego suave, y sirve con el arroz."]],
+ ["r78","Pollo a la mostaza y miel con brócoli","pollo","cn",20,["pollo","mostaza","miel","brocoli"],["Brócoli al micro 4 min con un poco de agua.","Dora el pollo en tiras.","Añade 1 cucharada de mostaza, 1 de miel y un chorrito de agua; reduce 2 min y sirve con el brócoli."]],
+ ["r79","Pollo al pesto con cherry","pollo","n",15,["pollo","pesto","cherry"],["Filetea el pollo fino y hazlo a la plancha.","Saltea los cherry partidos 2 min.","Fuera del fuego, mezcla con 2 cucharadas de pesto."]],
+ ["r80","Pollo teriyaki con arroz","pollo","c",20,["pollo","soja","miel","arroz","ajo"],["Cuece el arroz.","Dora el pollo en tacos con ajo picado.","Añade 3 cucharadas de soja y 1 de miel, reduce hasta que brille y sirve sobre el arroz."]],
+ ["r81","Brochetas de pollo con salsa de yogur","pollo","n",20,["pollo","yogur","pepino","ajo"],["Marina el pollo en dados 5 min con pimentón, comino, sal y un poco de yogur.","Plancha 8-10 min dándoles la vuelta.","Salsa: yogur, pepino rallado, ajo picado y sal."]],
+ ["r82","Pollo con champiñones y nata","pollo","n",15,["pollo","champis","nata","ajo"],["Dora el pollo en tiras y sácalo.","Saltea los champiñones laminados con ajo.","Vuelve el pollo, añade la nata y 3 min a fuego suave."]],
+ ["r83","Salteado de pollo con judías verdes","pollo","cn",15,["pollo","judias","ajo","soja"],["Judías (congeladas valen) al micro 5 min.","Saltea el pollo en tiras a fuego fuerte con ajo.","Añade las judías y un chorro de soja, 2 min más."]],
+ ["r84","Pollo a la naranja con arroz","pollo","c",20,["pollo","naranja","soja","arroz"],["Cuece el arroz.","Dora el pollo en tacos.","Añade el zumo de 1 naranja y un chorrito de soja; reduce 3 min hasta que espese."]],
+ ["r85","Nuggets caseros de pollo con ensalada","pollo","cn",20,["pollo","huevos","pan_rallado","lechuga"],["Corta el pollo en trozos y sálalo.","Pásalo por huevo batido y pan rallado.","Fríe en 1 dedo de aceite 3-4 min o al horno a 220 °C 12 min. Con ensalada."]],
+ ["r86","Pollo encebollado con pimientos","pollo","n",20,["pollo","cebolla","pimiento"],["Pocha cebolla y pimiento en tiras 10 min a fuego medio.","Sube el fuego y añade el pollo en tiras con sal y pimentón.","5 min más hasta que esté dorado."]],
+ ["r87","Ensalada de pollo, mango y aguacate","pollo","n",10,["pollo","mango","aguacate","lechuga","lima"],["Pollo a la plancha en dados.","Mango y aguacate en dados.","Mezcla sobre la lechuga y aliña con lima, aceite y sal."]],
+ ["r88","Sándwich de pollo, queso y tomate","pollo","n",10,["pan_molde","pollo","queso","tomate","lechuga"],["Filete de pollo fino a la plancha.","Tuesta el pan con el queso encima para que se funda.","Monta con pollo, tomate y lechuga."]],
+ ["r89","Pollo tikka con arroz","pollo","c",20,["pollo","yogur","curry","triturado","arroz"],["Cuece el arroz.","Mezcla el pollo en dados con yogur y curry y dóralo en la sartén.","Añade el tomate, 8 min a fuego suave, y sirve con el arroz."]],
+ ["r90","Pollo con calabacín y queso fresco","pollo","n",15,["pollo","calabacin","qfresco"],["Calabacín en medias lunas a la plancha con sal.","Pollo en dados a la plancha.","Mezcla con el queso fresco en dados y orégano."]],
+ ["r91","Quesadillas de pollo y maíz","pollo","n",15,["tortillas","pollo","maiz","queso"],["Pollo a la plancha en tiras con comino.","Rellena media tortilla con queso, pollo y maíz, y dóblala.","Dora por los dos lados en la sartén."]],
+ ["r92","Pollo con garbanzos y espinacas","pollo","c",15,["pollo","garbanzos","espinacas","ajo"],["Dora el pollo en tacos con ajo y pimentón.","Añade los garbanzos escurridos, 3 min.","Echa las espinacas hasta que bajen."]],
+ ["r93","Pollo al limón con cuscús","pollo","c",15,["pollo","limon","cuscus","ajo"],["Cuscús: mismo volumen de agua hirviendo, tapa 5 min.","Dora el pollo en tacos con ajo.","Riega con zumo de limón y ralladura, y sirve sobre el cuscús."]],
+ ["r94","Pollo barbacoa con maíz y patatas","pollo","c",20,["pollo","barbacoa","maiz","patatas"],["Patatas en gajos al micro 8 min y luego a dorar.","Dora el pollo en tiras.","Añade la salsa barbacoa y el maíz, 2 min."]],
+ ["r95","Pollo al curry con coliflor","pollo","c",20,["pollo","coliflor","curry","yogur"],["Coliflor en ramilletes al micro 5 min.","Dora el pollo en tacos con curry.","Añade la coliflor y, fuera del fuego, el yogur."]],
+ ["r96","Burrito de pollo y alubias","pollo","cn",15,["tortillas","pollo","alubias","queso","tomate"],["Pollo en tiras salteado con comino y pimentón.","Calienta las alubias y aplástalas un poco.","Rellena la tortilla con todo, enrolla y dórala en la sartén."]],
+ ["r97","Pollo con puerro y nata","pollo","n",15,["pollo","puerro","nata"],["Puerro en rodajas finas, pochado 5 min.","Añade el pollo en tiras y dóralo.","Nata, 3 min a fuego suave y pimienta."]],
+ ["r98","Pollo con boniato y espinacas","pollo","c",20,["pollo","boniato","espinacas"],["Boniato en dados al micro 7 min, luego a dorar en la sartén.","Dora el pollo en tacos con pimentón.","Añade las espinacas hasta que bajen."]],
+ ["r99","Bol de quinoa con pollo y calabacín","pollo","c",20,["quinoa","pollo","calabacin","limon"],["Lava y cuece la quinoa 12-15 min.","Pollo y calabacín en dados a la plancha.","Mezcla todo con limón y aceite."]],
+ ["r100","Wrap de pollo, hummus y zanahoria","pollo","n",10,["tortillas","pollo","hummus","zanahoria","lechuga"],["Pollo a la plancha en tiras.","Extiende el hummus en la tortilla.","Añade pollo, zanahoria rallada y lechuga, y enrolla."]],
+ ["r101","Pollo a la plancha con tzatziki","pollo","n",15,["pollo","griego","pepino","ajo"],["Pollo fileteado a la plancha con orégano.","Tzatziki: yogur griego, pepino rallado y escurrido, ajo, aceite y sal.","Sirve el pollo con la salsa por encima."]],
+ ["r102","Sopa de fideos con pollo","pollo","n",20,["caldo","fideos","pollo","zanahoria"],["Calienta el caldo con la zanahoria en rodajas finas.","Añade el pollo en dados pequeños, 5 min.","Echa los fideos, 4-5 min según el paquete."]],
+ ["r103","Pollo al wok con frutos secos","pollo","c",20,["pollo","frutos_secos","pimiento","soja","arroz"],["Cuece el arroz.","Saltea el pollo a fuego fuerte y luego el pimiento.","Añade frutos secos y soja, 1 min, y sirve con el arroz."]],
+ ["r104","Pollo al chilindrón exprés","pollo","c",20,["pollo","pimiento","cebolla","triturado","jamon"],["Dora el pollo en tacos y sácalo.","Sofríe cebolla, pimiento y jamón en taquitos.","Añade el tomate y el pollo, 10 min a fuego suave."]],
+ ["r105","Noodles de pollo con jengibre","pollo","c",15,["noodles","pollo","jengibre","soja","zanahoria"],["Cuece los noodles.","Saltea el pollo con jengibre rallado y la zanahoria en tiras.","Añade los noodles y la soja, 1 min más."]],
+ ["r106","Ensalada templada de pollo y lentejas","pollo","n",15,["pollo","lentejas","cherry","cebolleta"],["Pollo a la plancha en dados.","Enjuaga las lentejas y calienta 1 min en la sartén.","Mezcla con cherry y cebolleta y aliña con aceite y vinagre."]],
+ ["r107","Pollo al pimentón con patatas","pollo","c",20,["pollo","patatas","cebolla"],["Patatas y cebolla en láminas al micro 8 min con aceite y sal.","Dora el pollo en tacos con pimentón.","Junta todo en la sartén 3 min."]],
+ ["r108","Pollo relleno de jamón y queso","pollo","cn",20,["pollo","jamon","queso","lechuga"],["Abre la pechuga en libro y rellena con jamón y queso.","Ciérrala con un palillo y dórala a fuego medio 5 min por lado, tapada.","Córtala en rodajas y sirve con ensalada."]],
+ ["r109","Pollo con pisto rápido","pollo","c",20,["pollo","calabacin","pimiento","frito"],["Pocha pimiento y calabacín en dados pequeños.","Dora el pollo en tacos aparte.","Junta con el tomate frito, 5 min."]],
+ ["r110","Salpicón de pollo","pollo","n",10,["pollo","pimiento","cebolla","tomate","vinagre"],["Pollo a la plancha (o el que te sobró) en dados.","Pica muy fino pimiento, cebolla y tomate.","Mezcla y aliña con aceite, vinagre y sal. Mejor frío."]],
+ ["r111","Tiras de pollo picantes con salsa de yogur","pollo","n",15,["pollo","picante","mantequilla","griego","zanahoria"],["Dora el pollo en tiras.","Añade una nuez de mantequilla y salsa picante al gusto.","Sirve con yogur griego para mojar y palitos de zanahoria."]],
+ ["r112","Kebab casero en tortilla","pollo","cn",15,["pollo","tortillas","lechuga","tomate","yogur"],["Pollo en tiras finas con comino, pimentón y ajo en polvo, a fuego fuerte.","Salsa: yogur, ajo, limón y sal.","Monta la tortilla con pollo, lechuga, tomate y salsa."]],
+ ["r113","Tabulé con pollo","pollo","c",15,["cuscus","pollo","tomate","pepino","perejil","limon"],["Hidrata el cuscús 5 min y suéltalo con un tenedor.","Pollo a la plancha en dados.","Mezcla con tomate, pepino y perejil picados, limón y aceite."]],
+ // Carne
+ ["r114","Pavo con pimientos del piquillo","carne","n",15,["pavo","piquillo","ajo"],["Pavo en filetes finos a la plancha.","Saltea los piquillos en tiras con ajo laminado.","Sirve el pavo con los pimientos y su jugo."]],
+ ["r115","Albóndigas exprés en salsa de tomate","carne","c",20,["picada","triturado","cebolla","pan_rallado"],["Mezcla la carne con pan rallado, sal y ajo en polvo; haz bolitas pequeñas.","Dóralas en la sartén y sácalas.","Sofríe la cebolla, añade tomate y albóndigas, 10 min."]],
+ ["r116","Chili con carne","carne","c",20,["picada","alubias","triturado","cebolla","pimiento"],["Sofríe cebolla y pimiento.","Añade la carne con comino, pimentón y un poco de picante.","Tomate y alubias, 10 min a fuego suave."]],
+ ["r117","Lomo a la mostaza con patatas","carne","c",20,["lomo","mostaza","nata","patatas"],["Patatas en rodajas al micro 8 min, luego a dorar.","Lomo a la plancha 1-2 min por lado.","En la misma sartén: mostaza y nata, 2 min, y napa el lomo."]],
+ ["r118","Lomo al ajillo con champiñones","carne","n",15,["lomo","champis","ajo","perejil"],["Lomo en tiras dorado a fuego fuerte y sácalo.","Saltea los champiñones con ajo laminado.","Vuelve el lomo con perejil, 1 min."]],
+ ["r119","Ternera con brócoli y soja","carne","c",20,["ternera","brocoli","soja","jengibre","arroz"],["Cuece el arroz.","Ternera en tiras finas a fuego muy fuerte, 2 min, y sácala.","Saltea el brócoli con jengibre, vuelve la carne y añade la soja."]],
+ ["r120","Fajitas de ternera","carne","cn",15,["ternera","tortillas","pimiento","cebolla"],["Corta ternera, pimiento y cebolla en tiras.","Saltea fuerte con comino, pimentón y sal.","Rellena las tortillas calientes."]],
+ ["r121","Filete de ternera con ensalada","carne","n",10,["ternera","lechuga","tomate","cebolla"],["Saca el filete 10 min antes de la nevera.","Plancha muy caliente, 1-2 min por lado; sal gorda al final.","Ensalada de lechuga, tomate y cebolla."]],
+ ["r122","Pavo al curry con arroz","carne","c",20,["pavo","curry","nata","arroz"],["Cuece el arroz.","Dora el pavo en tacos con curry.","Añade la nata, 4 min, y sirve con el arroz."]],
+ ["r123","Pavo a la plancha con puré de boniato","carne","n",20,["pavo","boniato","mantequilla"],["Boniato pelado en dados al micro 8-10 min y aplástalo con mantequilla y sal.","Pavo fino a la plancha.","Sirve juntos con pimienta."]],
+ ["r124","Hamburguesa sin pan con calabacín","carne","n",15,["hamburguesas","calabacin","tomate"],["Calabacín en rodajas a la plancha.","Hamburguesa 3-4 min por lado.","Sirve con tomate en rodajas y orégano."]],
+ ["r125","Salchichas con pimientos y cebolla","carne","cn",15,["salchichas","pimiento","cebolla"],["Pimiento y cebolla en tiras a fuego medio 8 min.","Añade las salchichas y dóralas.","Un chorrito de agua o vino y 2 min más."]],
+ ["r126","Perritos con cebolla crujiente","carne","n",10,["salchichas","pan","ketchup","mostaza","cebolla"],["Dora las salchichas.","Cebolla muy fina frita hasta que esté crujiente.","Monta en el pan con ketchup y mostaza."]],
+ ["r127","Salchichas con lentejas","carne","c",15,["salchichas","lentejas","frito","cebolla"],["Sofríe la cebolla y las salchichas en rodajas.","Añade tomate frito, pimentón y un poco de agua.","Lentejas escurridas, 5 min."]],
+ ["r128","Patatas con chorizo y huevo","carne","c",20,["patatas","chorizo","huevos"],["Patatas en dados al micro 8 min, luego a dorar.","Añade el chorizo en rodajas, 2 min.","Huevo frito encima."]],
+ ["r129","Migas exprés con chorizo","carne","c",20,["pan","chorizo","ajo","pimiento"],["Pan del día anterior en dados, humedecido con un poco de agua y sal.","Dora ajo, chorizo y pimiento y sácalos.","Saltea el pan en esa grasa hasta que esté suelto y dorado; mezcla todo."]],
+ ["r130","Lomo en adobo con patatas","carne","c",20,["lomo","patatas","ajo","vinagre"],["Adobo: pimentón, orégano, ajo, un chorrito de vinagre y aceite. Marina el lomo 5 min.","Patatas en rodajas al micro 8 min y luego a dorar.","Lomo a la plancha 2 min por lado."]],
+ ["r131","Lomo a la naranja","carne","n",15,["lomo","naranja","miel"],["Lomo a la plancha 1-2 min por lado y sácalo.","En la sartén: zumo de 1 naranja y 1 cucharadita de miel, reduce 2 min.","Napa el lomo con la salsa."]],
+ ["r132","Picadillo de carne con patatas y guisantes","carne","c",20,["picada","patatas","guisantes","cebolla"],["Patatas en dados pequeños al micro 7 min.","Dora cebolla y carne con comino y pimentón.","Añade patatas y guisantes, 5 min."]],
+ ["r133","Pimientos rellenos de carne al micro","carne","c",20,["pimiento","picada","arroz","frito"],["Dora la carne y mézclala con arroz cocido (de ayer) y tomate frito.","Rellena los pimientos sin semillas.","Micro tapado 8-10 min."]],
+ ["r134","Calabacines rellenos de carne","carne","n",20,["calabacin","picada","frito","rallado"],["Calabacín partido a lo largo, vaciado, al micro 5 min.","Dora la carne con la pulpa picada y el tomate.","Rellena, queso por encima y gratina 5 min."]],
+ ["r135","Tostadas mexicanas de carne picada","carne","n",15,["tortillas","picada","queso","tomate","aguacate"],["Tuesta las tortillas en la sartén hasta que estén crujientes.","Dora la carne con comino y pimentón.","Encima: carne, queso, tomate y aguacate."]],
+ ["r136","Bocadillo de lomo con pimientos","carne","cn",15,["pan","lomo","pimiento"],["Pimiento en tiras a fuego medio 8 min.","Lomo fino a la plancha.","Monta en el pan con un chorrito de aceite."]],
+ ["r137","Secreto con ensalada de naranja","carne","n",15,["secreto","naranja","lechuga","cebolla"],["Secreto a la plancha muy caliente 3 min por lado, sal gorda.","Naranja pelada en rodajas y cebolla fina.","Ensalada con lechuga, aceite y sal."]],
+ ["r138","Ensalada de espinacas, bacon y champiñones","carne","n",10,["espinacas","bacon","champis","frutos_secos"],["Dora el bacon en tiras y sácalo.","Saltea los champiñones en esa grasa.","Mezcla sobre las espinacas crudas con los frutos secos y un chorrito de vinagre."]],
+ ["r139","Coliflor gratinada con bacon","carne","n",20,["coliflor","bacon","rallado"],["Coliflor en ramilletes al micro 6 min.","Dora el bacon.","Mezcla, queso por encima y gratina 5 min."]],
+ ["r140","Hamburguesa completa con huevo y bacon","carne","c",15,["hamburguesas","huevos","bacon","pan"],["Hamburguesa a la plancha 3-4 min por lado.","Dora el bacon y fríe un huevo.","Monta todo en el pan."]],
+ ["r141","Pavo con alcachofas","carne","n",15,["pavo","alcachofas","ajo"],["Pavo en tacos dorado con ajo.","Añade las alcachofas (de bote) partidas.","Saltea 3 min con un chorrito de limón o vino."]],
+ ["r142","Brochetas de lomo y pimiento","carne","n",20,["lomo","pimiento","cebolla","limon"],["Lomo en dados con pimentón, ajo en polvo y limón.","Ensarta con pimiento y cebolla.","Plancha 8-10 min dándoles la vuelta."]],
+ ["r143","Sándwich de pavo y aguacate","carne","n",10,["pan_molde","fiambre","aguacate","tomate"],["Tuesta el pan.","Aplasta el aguacate con sal y limón.","Monta con pavo y tomate."]],
+ ["r144","Bol de carne picada a la coreana","carne","c",20,["picada","soja","jengibre","arroz","pepino"],["Cuece el arroz.","Dora la carne con jengibre, ajo y soja hasta que quede tostada.","Sirve sobre el arroz con pepino en rodajas."]],
+ ["r145","Filete a la pimienta con patatas fritas","carne","c",20,["ternera","nata","patatas_fritas"],["Patatas al horno o freidora según el paquete.","Filete con pimienta molida gruesa, a la plancha 2 min por lado.","En la sartén: nata y más pimienta, 2 min, y napa la carne."]],
+ ["r146","Pavo al limón con arroz y judías","carne","c",20,["pavo","limon","arroz","judias"],["Cuece el arroz con las judías los últimos 5 min.","Dora el pavo en tacos.","Riega con limón y sirve junto."]],
+ ["r147","Salchichas con puré de patata","carne","cn",20,["salchichas","patatas","leche","mantequilla"],["Patatas peladas en dados al micro 10 min.","Aplástalas con mantequilla, leche y sal.","Dora las salchichas y sirve sobre el puré."]],
+ ["r148","Lomo con berenjena a la plancha","carne","n",15,["lomo","berenjena","tomate"],["Berenjena en rodajas finas a la plancha con sal.","Lomo a la plancha 1-2 min por lado.","Sirve con tomate en rodajas."]],
+ ["r149","Boniato relleno de carne picada","carne","c",20,["boniato","picada","frito","queso"],["Boniato pinchado al micro 8-10 min.","Dora la carne con tomate frito y comino.","Abre el boniato, rellena y queso por encima."]],
+ ["r150","Hojaldre de jamón y queso","carne","n",20,["hojaldre","jamon","queso","huevos"],["Horno a 200 °C.","Extiende el hojaldre, cubre media con jamón y queso y dóblalo.","Pinta con huevo batido y hornea 15 min."]],
+ ["r151","Pizza de jamón y champiñones","carne","n",20,["masa_pizza","frito","mozza","jamon","champis"],["Horno a 220 °C.","Extiende la masa y pinta con tomate.","Mozzarella, jamón y champiñones; hornea 12 min."]],
+ ["r152","Patatas a lo pobre con lomo","carne","c",20,["patatas","pimiento","cebolla","lomo"],["Patata en láminas al micro 8 min con aceite y sal.","Pocha cebolla y pimiento, añade la patata y dora.","Lomo a la plancha encima."]],
+ ["r153","Patatas rellenas de queso y bacon","carne","n",15,["patatas","queso","bacon","cebolleta"],["Patatas pinchadas al micro 8-10 min.","Dora el bacon picado.","Abre las patatas, queso, bacon y cebolleta; gratina 3 min."]],
+ ["r154","Pan con tomate y jamón","carne","n",5,["pan","tomate","jamon"],["Tuesta el pan.","Frota con tomate maduro, aceite y sal.","Jamón por encima."]],
+ ["r155","Lomo saltado","carne","c",20,["ternera","cebolla","tomate","soja","patatas_fritas","arroz"],["Cuece el arroz y haz las patatas según el paquete.","Ternera en tiras a fuego muy fuerte, luego cebolla y tomate en gajos.","Chorro de soja, mezcla con las patatas y sirve con el arroz."]],
+ // Huevo
+ ["r156","Huevos a la flamenca exprés","huevo","c",20,["huevos","frito","guisantes","chorizo","jamon"],["Sofríe chorizo y jamón en taquitos.","Añade tomate frito y guisantes, 3 min, y pásalo a una cazuelita o sartén pequeña.","Casca los huevos encima y tapa 5 min hasta que cuaje la clara."]],
+ ["r157","Revuelto de espinacas y queso fresco","huevo","n",10,["huevos","espinacas","ajo","qfresco"],["Saltea las espinacas con ajo.","Añade los huevos batidos.","Remueve a fuego suave y termina con el queso fresco en dados."]],
+ ["r158","Tortilla de atún y tomate","huevo","n",10,["huevos","atun","frito"],["Bate 3 huevos con el atún escurrido.","Cuaja la tortilla en la sartén.","Sirve con tomate frito caliente por encima."]],
+ ["r159","Tortilla de champiñones y queso","huevo","n",10,["huevos","champis","queso"],["Saltea los champiñones laminados.","Añade los huevos batidos.","Queso en el centro, dobla y deja que se funda."]],
+ ["r160","Huevos rellenos de atún","huevo","cn",15,["huevos","atun","mayo","lechuga"],["Cuece los huevos 10 min y enfríalos en agua.","Parte por la mitad y mezcla las yemas con atún y mayonesa.","Rellena y sirve sobre lechuga."]],
+ ["r161","Frittata de brócoli y queso","huevo","n",15,["huevos","brocoli","rallado","cebolla"],["Brócoli picado al micro 3 min; pocha la cebolla.","Mezcla con 4 huevos batidos y queso.","Cuaja tapado a fuego suave 8 min, sin darle la vuelta."]],
+ ["r162","Revuelto de calabacín y gambas","huevo","n",10,["huevos","calabacin","gambas","ajo"],["Saltea el calabacín en dados con ajo.","Añade las gambas peladas, 1 min.","Huevos batidos y remueve hasta que cuajen jugosos."]],
+ ["r163","Huevos turcos con yogur","huevo","n",15,["huevos","griego","ajo","pan"],["Mezcla el yogur con ajo rallado y sal, y extiéndelo en el plato.","Escalfa 2 huevos 3 min en agua con vinagre.","Encima del yogur con aceite y pimentón. Con pan."]],
+ ["r164","Tostada con huevo en el centro","huevo","n",10,["pan_molde","huevos","queso"],["Haz un agujero en el centro del pan con un vaso.","Dora el pan en la sartén y casca el huevo en el hueco.","Tapa 3 min; queso por encima al final."]],
+ ["r165","Tortilla de guisantes y jamón","huevo","cn",15,["huevos","guisantes","jamon","cebolla"],["Pocha la cebolla con el jamón.","Añade los guisantes, 2 min.","Mezcla con los huevos batidos y cuaja por los dos lados."]],
+ ["r166","Tortilla de puerro","huevo","n",15,["huevos","puerro","qfresco"],["Puerro en rodajas finas, pochado 6 min.","Mezcla con huevo batido y queso fresco desmenuzado.","Cuaja por los dos lados."]],
+ ["r167","Tortilla de berenjena","huevo","n",15,["huevos","berenjena","cebolla"],["Berenjena en dados pequeños y cebolla, pochadas 8 min.","Mezcla con huevo batido.","Cuaja por los dos lados."]],
+ ["r168","Revuelto a lo pobre","huevo","c",20,["huevos","patatas","pimiento","cebolla"],["Patata en dados al micro 7 min.","Dora patata, cebolla y pimiento en la sartén.","Añade los huevos y remueve hasta que cuajen."]],
+ ["r169","Tortilla paisana","huevo","c",20,["huevos","verd_cong","patatas","jamon"],["Patata en dados al micro 7 min.","Saltea las verduras con el jamón y la patata.","Mezcla con los huevos y cuaja por los dos lados."]],
+ ["r170","Huevos benedictinos exprés","huevo","n",15,["pan_molde","huevos","jamon","mayo","limon"],["Salsa rápida: mayonesa con limón y un poco de agua caliente.","Escalfa los huevos 3 min.","Pan tostado, jamón, huevo y salsa por encima."]],
+ ["r171","Tortilla de calabaza y feta","huevo","n",15,["huevos","calabaza","feta"],["Calabaza en dados pequeños al micro 5 min y luego a dorar.","Mezcla con huevo batido y feta desmenuzado.","Cuaja por los dos lados."]],
+ ["r172","Huevos a la mexicana","huevo","n",10,["huevos","tomate","cebolla","picante","tortillas"],["Sofríe cebolla y tomate picados 3 min.","Añade los huevos y salsa picante y remueve hasta que cuajen.","Sirve con tortillas calientes."]],
+ ["r173","Omelette de pavo y espinacas","huevo","n",10,["huevos","fiambre","espinacas","queso"],["Saltea las espinacas.","Cuaja los huevos batidos en la sartén.","Rellena con pavo, espinacas y queso y dobla."]],
+ ["r174","Aguacate relleno de huevo al horno","huevo","n",15,["aguacate","huevos","bacon"],["Parte el aguacate y agranda un poco el hueco del hueso.","Casca un huevo en cada mitad con sal y bacon picado.","Horno a 200 °C 12 min."]],
+ ["r175","Bocadillo de tortilla y pimientos","huevo","cn",15,["pan","huevos","pimiento"],["Pimiento en tiras a fuego medio 8 min.","Tortilla francesa de 2 huevos.","Monta en el pan."]],
+ ["r176","Huevo revuelto con tomate a la china","huevo","c",15,["huevos","tomate","arroz","cebolleta"],["Cuece el arroz.","Revuelto jugoso y sácalo; saltea el tomate en gajos con una pizca de azúcar.","Junta todo con la cebolleta y sirve sobre el arroz."]],
+ ["r177","Huevos rotos con chorizo y pimientos","huevo","c",20,["patatas_fritas","huevos","chorizo","pimiento"],["Patatas al horno o freidora según el paquete.","Saltea pimiento y chorizo.","Fríe los huevos, ponlo todo encima y rómpelos."]],
+ ["r178","Burrito de huevo y alubias","huevo","n",15,["tortillas","huevos","alubias","queso"],["Calienta las alubias con comino y aplástalas un poco.","Revuelto de huevos.","Rellena la tortilla con todo y queso, enrolla y dórala."]],
+ ["r179","Tortilla de alcachofas","huevo","n",15,["huevos","alcachofas","cebolla"],["Alcachofas de bote en cuartos, doradas con la cebolla.","Mezcla con los huevos batidos.","Cuaja por los dos lados."]],
+ ["r180","Sopa de ajo con huevo","huevo","n",15,["pan","ajo","huevos","caldo"],["Dora ajo laminado y pan en rebanadas finas con pimentón.","Añade el caldo, 5 min.","Casca los huevos dentro y deja 3 min hasta que cuajen."]],
+ ["r181","Tortilla de piquillos y queso fresco","huevo","n",10,["huevos","piquillo","qfresco"],["Piquillos en tiras salteados 1 min.","Mezcla con los huevos batidos y el queso.","Cuaja por los dos lados."]],
+ ["r182","Tortitas de avena y plátano con yogur","huevo","n",15,["avena","platano","huevos","griego"],["Tritura 1 plátano, 2 huevos y 5 cucharadas de avena.","Haz tortitas en la sartén a fuego medio, 2 min por lado.","Sirve con yogur griego."]],
+ // Legumbre
+ ["r183","Garbanzos salteados con gambas","legumbre","c",15,["garbanzos","gambas","ajo","pimiento"],["Saltea el pimiento en dados con ajo.","Añade las gambas y los garbanzos escurridos.","3 min con pimentón y perejil si tienes."]],
+ ["r184","Potaje exprés de garbanzos y bacalao","legumbre","c",20,["garbanzos","bacalao","espinacas","cebolla"],["Sofríe la cebolla con pimentón.","Añade los garbanzos y un vaso de agua, 5 min.","Bacalao desmigado y espinacas, 5 min más."]],
+ ["r185","Lentejas con arroz y cebolla","legumbre","c",20,["lentejas","arroz","cebolla"],["Cuece el arroz.","Cebolla en juliana a fuego medio hasta dorar bien (10 min) con comino.","Mezcla las lentejas calientes con el arroz y la cebolla por encima."]],
+ ["r186","Dal de lentejas exprés","legumbre","c",20,["lentejas","curry","triturado","cebolla","arroz"],["Cuece el arroz.","Pocha la cebolla con curry y ajo.","Añade tomate y lentejas y aplasta un poco, 8 min."]],
+ ["r187","Ensalada de lentejas, feta y pepino","legumbre","n",10,["lentejas","feta","pepino","cebolleta"],["Enjuaga las lentejas.","Pica pepino y cebolleta.","Mezcla con feta y aliña con limón y aceite."]],
+ ["r188","Alubias con chorizo exprés","legumbre","c",15,["alubias","chorizo","cebolla","frito"],["Sofríe la cebolla y el chorizo en rodajas.","Añade tomate frito y un poco de agua.","Alubias dentro, 5 min."]],
+ ["r189","Ensalada de alubias y atún","legumbre","n",10,["alubias","atun","cebolla","pimiento"],["Enjuaga las alubias.","Pica cebolla y pimiento.","Mezcla con el atún y aliña con aceite y vinagre."]],
+ ["r190","Alubias con espinacas y huevo","legumbre","c",15,["alubias","espinacas","huevos","ajo"],["Dora ajo con pimentón.","Añade las alubias y las espinacas.","Casca un huevo encima y tapa 4 min."]],
+ ["r191","Hummus casero con palitos de verdura","legumbre","n",10,["garbanzos","limon","ajo","zanahoria","pepino"],["Tritura garbanzos con limón, ajo, comino, aceite y un poco de agua.","Corta zanahoria y pepino en palitos.","Sirve con pimentón y un chorro de aceite."]],
+ ["r192","Ensalada con garbanzos crujientes","legumbre","n",20,["garbanzos","lechuga","tomate","qfresco"],["Seca los garbanzos y dóralos en la sartén con aceite y pimentón 8 min.","Pica lechuga y tomate.","Mezcla con queso fresco y los garbanzos calientes por encima."]],
+ ["r193","Falafel exprés","legumbre","cn",20,["garbanzos","cebolla","perejil","pan_rallado","yogur"],["Tritura garbanzos, cebolla, perejil, comino y 2 cucharadas de pan rallado.","Haz bolitas aplastadas y dóralas en la sartén 3 min por lado.","Sirve con salsa de yogur y limón."]],
+ ["r194","Tacos de garbanzos especiados","legumbre","n",15,["garbanzos","tortillas","aguacate","cebolla","lima"],["Saltea los garbanzos con comino, pimentón y picante.","Aplasta el aguacate con lima y sal.","Rellena las tortillas con cebolla picada."]],
+ ["r195","Boloñesa de soja texturizada con arroz","legumbre","c",20,["soja_text","triturado","cebolla","zanahoria","arroz"],["Hidrata la soja 10 min en agua caliente y escúrrela.","Sofríe cebolla y zanahoria picadas, añade la soja y el tomate, 8 min.","Sirve con arroz."]],
+ ["r196","Tacos de soja texturizada","legumbre","cn",20,["soja_text","tortillas","pimiento","cebolla"],["Hidrata la soja 10 min y escúrrela bien.","Saltea con cebolla, pimiento, comino y pimentón hasta que esté tostada.","Rellena las tortillas."]],
+ ["r197","Noodles con edamame","legumbre","c",15,["edamame","noodles","soja","zanahoria"],["Cuece los noodles.","Saltea edamame y zanahoria en tiras.","Mezcla con los noodles y la soja."]],
+ ["r198","Ensalada de edamame, maíz y aguacate","legumbre","n",10,["edamame","maiz","aguacate","cherry"],["Edamame al micro 2 min.","Aguacate en dados y cherry partidos.","Mezcla con el maíz y aliña con limón."]],
+ ["r199","Wrap de hummus y verduras","legumbre","n",15,["tortillas","hummus","calabacin","pimiento","feta"],["Calabacín y pimiento en tiras a la plancha.","Extiende hummus en la tortilla.","Verduras y feta, y enrolla."]],
+ ["r200","Garbanzos con calabaza al curry","legumbre","c",20,["garbanzos","calabaza","curry","cebolla"],["Calabaza en dados al micro 5 min.","Pocha la cebolla con curry.","Añade calabaza, garbanzos y un poco de agua, 8 min."]],
+ ["r201","Crema de lentejas y zanahoria","legumbre","n",15,["lentejas","zanahoria","cebolla","caldo"],["Pocha cebolla y zanahoria picadas 5 min.","Añade las lentejas y el caldo, 8 min.","Tritura y sirve con aceite y pimentón."]],
+ ["r202","Arroz con alubias y huevo","legumbre","c",20,["arroz","alubias","huevos","cebolla"],["Cuece el arroz.","Sofríe la cebolla con comino y añade las alubias.","Mezcla con el arroz y huevo frito encima."]],
+ ["r203","Empedrat de alubias y bacalao","legumbre","cn",15,["alubias","bacalao","tomate","cebolla","aceitunas"],["Desmiga el bacalao.","Pica tomate y cebolla.","Mezcla con las alubias y las aceitunas; aliña con aceite y vinagre."]],
+ ["r204","Pisto con garbanzos","legumbre","c",20,["garbanzos","calabacin","pimiento","triturado"],["Pocha pimiento y calabacín en dados.","Añade el tomate, 6 min.","Garbanzos dentro, 4 min más."]],
+ ["r205","Lentejas salteadas con champiñones","legumbre","n",15,["lentejas","champis","espinacas","ajo"],["Saltea los champiñones con ajo.","Añade las lentejas escurridas.","Espinacas hasta que bajen, sal y pimentón."]],
+ ["r206","Sopa de fideos con garbanzos y huevo","legumbre","n",15,["caldo","fideos","garbanzos","huevos"],["Cuece un huevo 10 min.","Calienta el caldo con los garbanzos y echa los fideos, 4 min.","Sirve con el huevo picado por encima."]],
+ // Verdura
+ ["r207","Tofu revuelto con verduras","verdura","n",10,["tofu","espinacas","cebolla","pimiento"],["Pocha cebolla y pimiento.","Desmiga el tofu con las manos y añádelo con cúrcuma o curry y sal.","Espinacas al final hasta que bajen."]],
+ ["r208","Tofu crujiente agridulce con arroz","verdura","c",20,["tofu","soja","miel","arroz","pimiento"],["Cuece el arroz.","Tofu en dados bien secos, dorado a fuego fuerte.","Añade el pimiento, soja y miel, y reduce 1 min."]],
+ ["r209","Noodles con tofu y cacahuetes","verdura","c",15,["noodles","tofu","frutos_secos","soja","cebolleta"],["Cuece los noodles.","Dora el tofu en dados.","Mezcla con noodles, soja, frutos secos picados y cebolleta."]],
+ ["r210","Curry de tofu y espinacas","verdura","c",20,["tofu","espinacas","curry","nata","arroz"],["Cuece el arroz.","Dora el tofu con curry.","Añade espinacas y nata, 4 min."]],
+ ["r211","Crema de calabaza","verdura","n",20,["calabaza","cebolla","zanahoria","qcrema"],["Pocha la cebolla, añade calabaza y zanahoria en dados.","Cubre de agua, 12 min.","Tritura con una cucharada de queso crema."]],
+ ["r212","Crema de puerros","verdura","n",20,["puerro","patatas","leche","caldo"],["Pocha el puerro 5 min.","Añade la patata en dados pequeños y el caldo, 12 min.","Tritura con un chorro de leche."]],
+ ["r213","Coliflor al curry con garbanzos","verdura","c",20,["coliflor","garbanzos","curry","yogur"],["Coliflor en ramilletes al micro 5 min.","Dora la coliflor con curry.","Añade los garbanzos, 3 min, y sirve con yogur."]],
+ ["r214","Coliflor gratinada con jamón","verdura","n",20,["coliflor","nata","rallado","jamon"],["Coliflor en ramilletes al micro 6 min.","Mezcla con nata y jamón en una fuente.","Queso por encima y gratina 6 min."]],
+ ["r215","Berenjenas a la parmesana exprés","verdura","n",20,["berenjena","frito","mozza","rallado"],["Berenjena en rodajas a la plancha hasta dorar.","Alterna capas con tomate y mozzarella en una fuente.","Queso rallado y gratina 6 min."]],
+ ["r216","Berenjenas crujientes con miel","verdura","n",20,["berenjena","harina","miel"],["Berenjena en bastones, en agua con sal 5 min y bien seca.","Pásala por harina y fríe en tandas hasta dorar.","Miel por encima al servir."]],
+ ["r217","Menestra de verduras con jamón","verdura","c",15,["verd_cong","jamon","ajo","huevos"],["Cuece un huevo 10 min.","Verduras al micro según el paquete.","Saltéalas con ajo y jamón y sirve con el huevo picado."]],
+ ["r218","Salteado de verduras con quinoa y feta","verdura","c",20,["quinoa","verd_cong","feta"],["Cuece la quinoa 12-15 min.","Saltea las verduras.","Mezcla y desmenuza el feta por encima."]],
+ ["r219","Champiñones rellenos de jamón","verdura","n",15,["champis","jamon","ajo","perejil","rallado"],["Quita los pies de los champiñones y pícalos.","Saltéalos con ajo, jamón y perejil y rellena.","Queso por encima y horno o sartén tapada 8 min."]],
+ ["r220","Gazpacho andaluz","verdura","cn",10,["tomate","pimiento","pepino","ajo","pan","vinagre"],["Trocea tomate, pimiento, pepino y ajo.","Tritura con pan, aceite, vinagre, sal y un poco de agua fría.","Cuela si lo quieres fino y sirve muy frío."]],
+ ["r221","Salmorejo con huevo y jamón","verdura","cn",10,["tomate","pan","ajo","huevos","jamon"],["Tritura tomates, pan, ajo, aceite y sal hasta que quede espeso.","Cuece un huevo 10 min.","Sirve con huevo y jamón picados por encima."]],
+ ["r222","Ensalada de burrata con cherry y pesto","verdura","n",5,["burrata","cherry","pesto","pan"],["Cherry partidos con sal y aceite.","Burrata en el centro.","Pesto por encima y pan tostado."]],
+ ["r223","Ensalada de espinacas, manzana y queso fresco","verdura","n",10,["espinacas","manzana","qfresco","frutos_secos"],["Manzana en láminas finas.","Queso fresco en dados.","Mezcla con espinacas y frutos secos; aliña con aceite, vinagre y miel."]],
+ ["r224","Escalivada al micro con huevo","verdura","n",20,["berenjena","pimiento","cebolla","huevos"],["Berenjena, pimiento y cebolla en tiras al micro tapados 12 min.","Cuece los huevos 10 min.","Aliña las verduras con aceite y sal y sirve con el huevo."]],
+ ["r225","Pizzetas de calabacín","verdura","n",15,["calabacin","frito","mozza","jamon"],["Calabacín en rodajas gruesas a la plancha 2 min por lado.","Encima tomate, jamón y mozzarella.","Gratina 5 min o sartén tapada."]],
+ ["r226","Crema de brócoli","verdura","n",15,["brocoli","patatas","cebolla","qcrema"],["Pocha la cebolla, añade brócoli y patata en dados.","Cubre de agua, 10 min.","Tritura con queso crema."]],
+ ["r227","Crema de zanahoria y jengibre","verdura","n",20,["zanahoria","jengibre","cebolla","caldo","yogur"],["Pocha la cebolla con jengibre rallado.","Añade la zanahoria en rodajas y el caldo, 14 min.","Tritura y sirve con una cucharada de yogur."]],
+ ["r228","Ensalada de patata, judías y huevo","verdura","c",20,["patatas","judias","huevos","cebolla"],["Patata y judías al micro 8 min.","Cuece los huevos 10 min.","Mezcla con cebolla y aliña con aceite, vinagre y pimentón."]],
+ ["r229","Porrusalda rápida","verdura","n",20,["puerro","patatas","zanahoria","caldo"],["Pocha el puerro 4 min.","Añade patata y zanahoria en dados y el caldo.","15 min a fuego medio."]],
+ ["r230","Guisantes con jamón","verdura","n",15,["guisantes","jamon","cebolla","huevos"],["Pocha la cebolla con el jamón.","Añade los guisantes y un chorrito de agua, 5 min.","Huevo escalfado o frito encima."]],
+ ["r231","Alcachofas con jamón","verdura","n",15,["alcachofas","jamon","ajo"],["Alcachofas de bote en mitades, doradas.","Añade ajo laminado y jamón.","Saltea 2 min."]],
+ ["r232","Bol de boniato, garbanzos y espinacas","verdura","c",20,["boniato","garbanzos","espinacas","griego"],["Boniato en dados al micro 7 min, luego a dorar.","Saltea los garbanzos con pimentón y las espinacas.","Monta el bol con yogur griego por encima."]],
+ ["r233","Tortitas de calabacín y feta","verdura","n",20,["calabacin","huevos","feta","pan_rallado"],["Ralla el calabacín y escúrrelo bien apretando.","Mezcla con huevo, feta y pan rallado.","Tortitas en la sartén, 3 min por lado."]],
+ // Pescado
+ ["r234","Bacalao dorado","pescado","c",20,["bacalao","patatas","huevos","cebolla","aceitunas"],["Patata en bastones muy finos, frita hasta que esté crujiente (o patatas paja).","Pocha la cebolla y añade el bacalao desmigado, 3 min.","Junta la patata, huevos batidos y remueve hasta que cuajen jugosos. Aceitunas por encima."]],
+ ["r235","Bacalao con tomate","pescado","c",20,["bacalao","frito","cebolla","pimiento"],["Pocha cebolla y pimiento.","Añade tomate frito, 3 min.","Pon el bacalao encima, tapa y 6-8 min a fuego suave."]],
+ ["r236","Merluza en salsa verde","pescado","n",15,["merluza","ajo","perejil","caldo"],["Dora ajo picado en aceite a fuego suave.","Añade un poco de caldo y perejil picado.","Merluza dentro, 5-6 min moviendo la sartén para que ligue."]],
+ ["r237","Merluza a la gallega","pescado","c",20,["merluza","patatas","ajo"],["Patatas en rodajas al micro 8 min.","Merluza a la plancha o cocida 5 min encima de las patatas.","Ajada: dora ajo en aceite, añade pimentón fuera del fuego y riega."]],
+ ["r238","Tacos de pescado con salsa de yogur","pescado","n",15,["merluza","tortillas","lechuga","yogur","lima"],["Merluza en tiras con comino y pimentón, a la plancha.","Salsa: yogur, lima y sal.","Monta con lechuga en las tortillas calientes."]],
+ ["r239","Ensalada nizarda","pescado","cn",20,["atun","huevos","judias","patatas","aceitunas","tomate"],["Patata y judías al micro 8 min; cuece los huevos 10 min.","Trocea tomate y huevos.","Monta todo con el atún y las aceitunas; aliña con aceite y vinagre."]],
+ ["r240","Calabacín relleno de atún","pescado","n",20,["calabacin","atun","frito","rallado"],["Calabacín a lo largo, vaciado, al micro 5 min.","Mezcla la pulpa picada con atún y tomate.","Rellena, queso y gratina 5 min."]],
+ ["r241","Hamburguesas de atún","pescado","cn",15,["atun","huevos","pan_rallado","lechuga"],["Mezcla 2 latas de atún escurrido, 1 huevo y pan rallado.","Forma hamburguesas y dóralas 3 min por lado.","Sirve con lechuga y limón."]],
+ ["r242","Piquillos rellenos de atún","pescado","n",10,["piquillo","atun","mayo","lechuga"],["Mezcla el atún con un poco de mayonesa.","Rellena los piquillos.","Sirve sobre lechuga con un chorrito de aceite."]],
+ ["r243","Calamares encebollados con arroz","pescado","c",20,["calamares","cebolla","arroz"],["Cuece el arroz.","Cebolla en juliana pochada 8 min.","Añade los calamares en anillas, 3 min a fuego fuerte, y un chorrito de vino si tienes."]],
+ ["r244","Gambas con champiñones al ajillo","pescado","n",10,["gambas","champis","ajo","perejil"],["Saltea los champiñones laminados.","Añade ajo laminado y una pizca de cayena.","Gambas 2 min y perejil."]],
+ ["r245","Tostas de mejillones y piquillo","pescado","n",5,["mejillones","pan","piquillo"],["Tuesta el pan.","Piquillo en tiras encima.","Mejillones en escabeche con un poco de su salsa."]],
+ ["r246","Salmón teriyaki con brócoli","pescado","c",20,["salmon","soja","miel","arroz","brocoli"],["Cuece el arroz y el brócoli al micro 4 min.","Salmón en dados, dorado 3 min.","Soja y miel, reduce 1 min y sirve."]],
+ ["r247","Bol tipo sushi con surimi","pescado","c",20,["arroz","surimi","aguacate","pepino","soja"],["Cuece el arroz y aliña con un chorrito de vinagre y una pizca de azúcar.","Surimi en tiras, pepino y aguacate en láminas.","Monta el bol con soja."]],
+ ["r248","Wrap de atún, maíz y lechuga","pescado","n",10,["tortillas","atun","maiz","lechuga","mayo"],["Mezcla atún, maíz y un poco de mayonesa.","Extiende en la tortilla con lechuga.","Enrolla y parte por la mitad."]],
+ ["r249","Bocadillo de calamares","pescado","cn",15,["pan","calamares","harina","limon"],["Calamares en anillas bien secos y enharinados.","Fríe 2 min en aceite caliente.","En el pan con limón o un poco de mayonesa."]],
+ // Pasta
+ ["r250","Macarrones con chorizo y tomate","pasta","c",20,["pasta","chorizo","frito","rallado"],["Cuece la pasta.","Dora el chorizo en rodajas y añade el tomate.","Mezcla y queso rallado por encima."]],
+ ["r251","Pasta al pesto con pollo y cherry","pasta","c",20,["pasta","pesto","pollo","cherry"],["Cuece la pasta.","Pollo a la plancha en dados.","Mezcla con pesto y cherry partidos."]],
+ ["r252","Pasta con calabacín y gambas","pasta","c",15,["pasta","calabacin","gambas","ajo"],["Cuece la pasta.","Saltea el calabacín en dados con ajo, luego las gambas.","Mezcla con un poco de agua de cocción."]],
+ ["r253","Pasta con espinacas, nata y bacon","pasta","c",15,["pasta","espinacas","nata","bacon"],["Cuece la pasta.","Dora el bacon y añade las espinacas.","Nata, 2 min, y mezcla."]],
+ ["r254","Fideuá exprés","pasta","c",20,["fideos","gambas","calamares","caldo","ajo"],["Dora gambas y calamares y sácalos.","Tuesta los fideos en esa sartén con ajo y pimentón.","Cubre con caldo caliente, 8 min; vuelve el marisco al final."]],
+ ["r255","Pasta con boloñesa de lentejas","pasta","c",20,["pasta","lentejas","triturado","zanahoria","cebolla"],["Cuece la pasta.","Sofríe cebolla y zanahoria picadas.","Añade tomate y lentejas, 8 min, y mezcla."]],
+ ["r256","Pasta alla norma","pasta","c",20,["pasta","berenjena","triturado","mozza"],["Cuece la pasta.","Dora la berenjena en dados y añade el tomate, 8 min.","Mezcla y mozzarella por encima."]],
+ ["r257","Pasta con caballa y limón","pasta","c",15,["pasta","caballa","limon","perejil"],["Cuece la pasta.","Desmiga la caballa con su aceite.","Mezcla con ralladura y zumo de limón y perejil."]],
+ ["r258","Pasta con alcachofas y jamón","pasta","c",15,["pasta","alcachofas","jamon","ajo"],["Cuece la pasta.","Dora las alcachofas partidas con ajo y jamón.","Mezcla con un poco de agua de cocción y aceite."]],
+ ["r259","Pasta con queso crema y champiñones","pasta","c",15,["pasta","qcrema","champis","ajo"],["Cuece la pasta.","Saltea los champiñones con ajo.","Añade 2 cucharadas de queso crema y agua de cocción, y mezcla."]],
+ ["r260","Macarrones con queso","pasta","c",20,["pasta","leche","queso","mantequilla"],["Cuece la pasta.","Funde la mantequilla con la leche y el queso a fuego suave.","Mezcla con la pasta y pimienta."]],
+ // Arroz
+ ["r261","Arroz de sartén con pollo y verduras","arroz","c",20,["arroz","pollo","verd_cong","caldo"],["Dora el pollo en tacos y las verduras.","Añade el arroz y nácaralo 1 min con pimentón.","Caldo caliente (el triple que de arroz), 16 min sin remover."]],
+ ["r262","Arroz de marisco exprés","arroz","c",20,["arroz","gambas","calamares","caldo","frito"],["Dora calamares y gambas y sácalas.","Arroz con tomate frito y pimentón, 1 min.","Caldo caliente, 16 min; las gambas encima los últimos 3."]],
+ ["r263","Arroz meloso de champiñones y queso","arroz","c",20,["arroz","champis","cebolla","caldo","rallado"],["Pocha la cebolla con los champiñones.","Añade el arroz y el caldo caliente poco a poco, removiendo, 16 min.","Fuera del fuego, queso rallado."]],
+ ["r264","Arroz con chorizo y guisantes","arroz","c",20,["arroz","chorizo","guisantes","pimiento"],["Cuece el arroz.","Saltea chorizo y pimiento.","Añade guisantes y el arroz, 2 min."]],
+ ["r265","Arroz con salchichas y tomate","arroz","c",20,["arroz","salchichas","frito","guisantes"],["Cuece el arroz.","Dora las salchichas en rodajas.","Tomate frito y guisantes, 3 min, y sirve con el arroz."]],
+ ["r266","Bibimbap rápido","arroz","c",20,["arroz","picada","espinacas","zanahoria","huevos","soja"],["Cuece el arroz.","Dora la carne con soja; saltea espinacas y zanahoria rallada aparte.","Monta el bol con un huevo frito encima y salsa picante si tienes."]],
+ ["r267","Poke bowl de atún y mango","arroz","c",15,["arroz","atun","mango","pepino","soja"],["Cuece el arroz y deja templar.","Mango y pepino en dados.","Monta con el atún y aliña con soja."]]
 ];
 const REC = Object.fromEntries(R.map(r=>[r[0],{id:r[0],name:r[1],cat:r[2],meal:r[3],min:r[4],ings:r[5],steps:r[6]}]));
 SP.forEach(r=>REC[r[0]]={id:r[0],name:r[1],cat:r[2],meal:"cn",occ:r[3],min:r[4],ings:r[5],steps:r[6],tip:r[7],special:true});
@@ -432,7 +645,7 @@ function logMeal(entry){
   S.history.push(Object.assign({d:todayIso(),meal:mealNow},entry));
   S.history.sort((a,b)=>a.d.localeCompare(b.d));
   if(S.history.length>400) S.history=S.history.slice(-400);
-  persist(); renderStats();
+  persist();
 }
 let mealNow = new Date().getHours()<17?"comida":"cena";
 let tab="hoy";
@@ -451,17 +664,6 @@ function score(r, opts={}){
   return {s,miss,haveN};
 }
 
-/* ---------- Render: cabecera ---------- */
-function renderStats(){
-  const p=pastaThisWeek(), max=S.settings.pastaMax, wk=thisWeekHistory();
-  const cats=new Set(wk.map(h=>h.cat)).size;
-  const last=S.history[S.history.length-1];
-  document.getElementById("stats").innerHTML=`
-    <div class="stat ${p>=max?"warn":""}"><span class="label">Pasta esta semana</span><b>${p} / ${max}</b><span class="small muted">${p>=max?"Límite alcanzado: te propongo otras cosas":"Te queda "+(max-p)}</span></div>
-    <div class="stat"><span class="label">Platos esta semana</span><b>${wk.length}</b><span class="small muted">${cats} tipos distintos</span></div>
-    <div class="stat"><span class="label">En la despensa</span><b>${S.pantry.length}</b><span class="small muted">ingredientes marcados</span></div>
-    <div class="stat"><span class="label">Último plato</span><b style="font-size:16px;line-height:1.3">${last?esc(last.name):"—"}</b><span class="small muted">${last?fmtDate(last.d)+" · "+last.meal:"Aún no has registrado nada"}</span></div>`;
-}
 function fmtDate(d){const t=todayIso();if(d===t)return"Hoy";if(d===iso(addDays(new Date(),-1)))return"Ayer";const x=new Date(d+"T12:00");return x.toLocaleDateString("es-ES",{weekday:"short",day:"numeric",month:"short"})}
 
 /* ---------- Tarjeta de receta ---------- */
@@ -816,7 +1018,6 @@ function render(){
   document.querySelectorAll("#tabs button").forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===tab));
   ({hoy:renderHoy,especial:renderEspecial,semana:renderSemana,compra:renderCompra,historial:renderHistorial})[tab]();
   if(tab==="hoy") applySearch();
-  renderStats();
 }
 document.getElementById("tabs").addEventListener("click",e=>{const b=e.target.closest("button[data-tab]");if(!b)return;tab=b.dataset.tab;try{localStorage.setItem("qch-tab",tab)}catch(_){ }render();window.scrollTo(0,0)});
 document.addEventListener("click",e=>{
