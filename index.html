@@ -483,7 +483,7 @@ function card(r,info,actions){
 }
 
 /* ---------- Pestaña HOY ---------- */
-let showAll=false, onlyHave=false, aiCtl=null, sampleFn=null;
+let showAll=false, hoyMode="near", aiCtl=null, sampleFn=null;
 const aiAll={hoy:{loading:false,items:null,err:null,ask:""}, esp:{loading:false,items:null,err:null,ask:""}};
 let aiState=aiAll.hoy;
 let espFilter="todas";
@@ -509,8 +509,11 @@ function pantryHTML(open){
 function renderHoy(){
   const pantryOpen=document.getElementById("pantry")?.open ?? S.example;
   const want = mealNow==="comida"?"c":"n";
-  const all = QUICK.filter(r=>r.meal.includes(want)).map(r=>({r,info:score(r)})).sort((a,b)=>b.info.s-a.info.s);
-  const list = onlyHave ? all.filter(x=>!x.info.miss.length) : all;
+  const all = QUICK.filter(r=>r.meal.includes(want)).map(r=>({r,info:score(r)}));
+  // mine: solo platos completos · near: primero los que menos te faltan · all: todas por orden alfabético
+  const list = hoyMode==="mine" ? all.filter(x=>!x.info.miss.length).sort((a,b)=>b.info.s-a.info.s)
+    : hoyMode==="all" ? all.sort((a,b)=>a.r.name.localeCompare(b.r.name,"es"))
+    : all.sort((a,b)=>a.info.miss.length-b.info.miss.length||b.info.s-a.info.s);
   // Proteínas o ingredientes tuyos marcados que no salen en ningún plato rápido
   const orphans = S.pantry.filter(k=>ING[k]&&["prot","leg","mine"].includes(ING[k][1])&&!QUICK.some(r=>r.ings.includes(k)));
   const orphanNote = orphans.length?`<p class="note" style="margin:0">No tengo platos rápidos con ${esc(orphans.map(ingName).join(", "))}. ${sampleFn?"Pide ideas a Claude más abajo o añade":"Añade"} tu propia receta en Recetas → Mis recetas.</p>`:"";
@@ -523,12 +526,12 @@ function renderHoy(){
       <div class="row between">
         <h2>Con lo que tienes, para ${mealNow==="comida"?"comer":"cenar"}</h2>
         <div class="row">
-          <div class="seg" role="group" aria-label="Qué recetas ver"><button data-act="only-have" data-v="0" aria-pressed="${!onlyHave}">Todas</button><button data-act="only-have" data-v="1" aria-pressed="${onlyHave}">Lo tengo todo</button></div>
+          <select id="hoyMode" class="btn sm" aria-label="Qué recetas ver">${[["mine","Solo con lo que tengo"],["near","Lo que tengo primero"],["all","Todas las recetas"]].map(([k,l])=>`<option value="${k}" ${k===hoyMode?"selected":""}>${l}</option>`).join("")}</select>
           <div class="seg" role="group" aria-label="Comida o cena"><button data-meal="comida" aria-pressed="${mealNow==="comida"}">Comida</button><button data-meal="cena" aria-pressed="${mealNow==="cena"}">Cena</button></div>
         </div>
       </div>
       ${orphanNote}
-      ${list.length?`<div class="cards">${top.map(x=>card(x.r,x.info,act(x.r))).join("")}</div>`:`<p class="note" style="margin:0">Con lo que tienes marcado no sale ningún plato completo. Marca más ingredientes o pulsa «Todas» para ver los que casi tienes.</p>`}
+      ${list.length?`<div class="cards">${top.map(x=>card(x.r,x.info,act(x.r))).join("")}</div>`:`<p class="note" style="margin:0">Con lo que tienes marcado no sale ningún plato completo. Marca más ingredientes o elige «Lo que tengo primero» para ver los que casi tienes.</p>`}
       ${list.length>6?`<div><button class="btn sm ghost" data-act="more">${showAll?"Ver menos":"Ver las "+list.length+" opciones"}</button></div>`:""}
     </section>
     ${fresh.length?`<section class="block"><h2>Para salir de la rutina</h2><p class="small muted" style="margin:0">Platos que no has hecho nunca y para los que te faltan como mucho 2 cosas.</p><div class="cards">${fresh.map(x=>card(x.r,x.info,act(x.r))).join("")}</div></section>`:""}
@@ -838,7 +841,6 @@ document.addEventListener("click",e=>{
   if(d.slotDone!=null){ const i=+d.slotDone, s=S.plan.slots[i], r=REC[s.rid]; s.done=true; S.history.push({d:iso(addDays(planWeekStart(),s.day)),meal:s.meal,rid:r.id,name:r.name,cat:r.cat}); S.history.sort((a,b)=>a.d.localeCompare(b.d)); persist(); toast(`Apuntado: ${r.name}`); render(); return; }
   switch(d.act){
     case "more": showAll=!showAll; render(); break;
-    case "only-have": onlyHave=d.v==="1"; render(); break;
     case "rform-new": editId=null; formOpen=true; render(); document.getElementById("rfName")?.focus(); break;
     case "rform-cancel": editId=null; formOpen=false; render(); break;
     case "clear-pantry": S.pantry=[]; persist(); render(); break;
@@ -853,6 +855,7 @@ document.addEventListener("change",e=>{
   if(t.dataset.price){ const v=parseFloat(String(t.value).replace(",",".")); if(v>0) S.prices[t.dataset.price]=Math.round(v*100)/100; else delete S.prices[t.dataset.price]; persist(); render(); return; }
   if(t.dataset.buy){ const k=t.dataset.buy; if(!has(k)) S.pantry.push(k); S.shopExtra=(S.shopExtra||[]).filter(x=>x.k!==k); persist(); toast(`${ingName(k)} a la despensa`); setTimeout(render,250); }
   if(t.id==="importFile"&&t.files[0]){ const fr=new FileReader(); fr.onload=()=>{ try{ const d=JSON.parse(fr.result); if(!d||!Array.isArray(d.pantry)) throw 0; S=Object.assign(defaults(),d); syncCustom(); syncMine(); persist(); render(); toast("Copia cargada"); }catch(_){ toast("Ese archivo no es una copia válida"); } }; fr.readAsText(t.files[0]); return; }
+  if(t.id==="hoyMode"){ hoyMode=t.value; showAll=false; render(); }
   if(t.id==="pastaMax"){ S.settings.pastaMax=+t.value; persist(); render(); }
   if(t.id==="hRec"){ const o=t.value==="__otro"; document.getElementById("hName").hidden=!o; document.getElementById("hCat").hidden=!o; }
 });
