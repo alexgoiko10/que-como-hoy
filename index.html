@@ -467,7 +467,7 @@ function card(r,info,actions){
 }
 
 /* ---------- Pestaña HOY ---------- */
-let showAll=false, aiCtl=null, sampleFn=null;
+let showAll=false, onlyHave=false, aiCtl=null, sampleFn=null;
 const aiAll={hoy:{loading:false,items:null,err:null,ask:""}, esp:{loading:false,items:null,err:null,ask:""}};
 let aiState=aiAll.hoy;
 let espFilter="todas";
@@ -493,7 +493,8 @@ function pantryHTML(open){
 function renderHoy(){
   const pantryOpen=document.getElementById("pantry")?.open ?? S.example;
   const want = mealNow==="comida"?"c":"n";
-  const list = QUICK.filter(r=>r.meal.includes(want)).map(r=>({r,info:score(r)})).sort((a,b)=>b.info.s-a.info.s);
+  const all = QUICK.filter(r=>r.meal.includes(want)).map(r=>({r,info:score(r)})).sort((a,b)=>b.info.s-a.info.s);
+  const list = onlyHave ? all.filter(x=>!x.info.miss.length) : all;
   const top = list.slice(0, showAll?list.length:6);
   const fresh = QUICK.filter(r=>r.cat!=="pasta"&&daysSince(r.id)===Infinity&&!top.some(t=>t.r.id===r.id)).map(r=>({r,info:score(r)})).filter(x=>x.info.miss.length<=2).sort((a,b)=>a.info.miss.length-b.info.miss.length||b.info.s-a.info.s).slice(0,3);
   const act = r=>`<button class="btn sm primary" data-cook="${r.id}">Lo cocino</button>`;
@@ -502,10 +503,13 @@ function renderHoy(){
     <section class="block" style="margin-top:22px">
       <div class="row between">
         <h2>Con lo que tienes, para ${mealNow==="comida"?"comer":"cenar"}</h2>
-        <div class="seg" role="group" aria-label="Comida o cena"><button data-meal="comida" aria-pressed="${mealNow==="comida"}">Comida</button><button data-meal="cena" aria-pressed="${mealNow==="cena"}">Cena</button></div>
+        <div class="row">
+          <div class="seg" role="group" aria-label="Qué recetas ver"><button data-act="only-have" data-v="0" aria-pressed="${!onlyHave}">Todas</button><button data-act="only-have" data-v="1" aria-pressed="${onlyHave}">Lo tengo todo</button></div>
+          <div class="seg" role="group" aria-label="Comida o cena"><button data-meal="comida" aria-pressed="${mealNow==="comida"}">Comida</button><button data-meal="cena" aria-pressed="${mealNow==="cena"}">Cena</button></div>
+        </div>
       </div>
-      <div class="cards">${top.map(x=>card(x.r,x.info,act(x.r))).join("")}</div>
-      <div><button class="btn sm ghost" data-act="more">${showAll?"Ver menos":"Ver las "+list.length+" opciones"}</button></div>
+      ${list.length?`<div class="cards">${top.map(x=>card(x.r,x.info,act(x.r))).join("")}</div>`:`<p class="note" style="margin:0">Con lo que tienes marcado no sale ningún plato completo. Marca más ingredientes o pulsa «Todas» para ver los que casi tienes.</p>`}
+      ${list.length>6?`<div><button class="btn sm ghost" data-act="more">${showAll?"Ver menos":"Ver las "+list.length+" opciones"}</button></div>`:""}
     </section>
     ${fresh.length?`<section class="block"><h2>Para salir de la rutina</h2><p class="small muted" style="margin:0">Platos que no has hecho nunca y para los que te faltan como mucho 2 cosas.</p><div class="cards">${fresh.map(x=>card(x.r,x.info,act(x.r))).join("")}</div></section>`:""}
     ${aiBlock("hoy","Ideas nuevas con Claude","Te propone 4 platos distintos a partir de tu despensa y de lo que has comido esta semana.","Opcional: me apetece algo con picante, algo frío…","Dame ideas")}`;
@@ -815,6 +819,7 @@ document.addEventListener("click",e=>{
   if(d.slotDone!=null){ const i=+d.slotDone, s=S.plan.slots[i], r=REC[s.rid]; s.done=true; S.history.push({d:iso(addDays(planWeekStart(),s.day)),meal:s.meal,rid:r.id,name:r.name,cat:r.cat}); S.history.sort((a,b)=>a.d.localeCompare(b.d)); persist(); toast(`Apuntado: ${r.name}`); render(); return; }
   switch(d.act){
     case "more": showAll=!showAll; render(); break;
+    case "only-have": onlyHave=d.v==="1"; render(); break;
     case "rform-new": editId=null; formOpen=true; render(); document.getElementById("rfName")?.focus(); break;
     case "rform-cancel": editId=null; formOpen=false; render(); break;
     case "clear-pantry": S.pantry=[]; persist(); render(); break;
