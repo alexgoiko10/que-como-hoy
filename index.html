@@ -158,6 +158,13 @@ section.block{display:flex;flex-direction:column;gap:12px;margin-bottom:28px}
 .padd{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
 .padd input{width:100%;min-width:0;border:1px solid var(--line);background:var(--bg);border-radius:999px;padding:7px 14px}
 #addIng input{flex:1}
+.rform{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px;display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+.rform .full{grid-column:1/-1}
+.rform label{display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:600;color:var(--muted)}
+.rform label i{font-style:normal;font-weight:400}
+.rform label .small{font-weight:400}
+.rform input,.rform select,.rform textarea{width:100%;min-width:0;border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:7px 10px;font-weight:400;color:var(--ink)}
+.rform textarea{resize:vertical}
 @media (max-width:640px){.padd{grid-template-columns:1fr}}
 .mchip{display:inline-flex;align-items:center}
 .mchip .chip{border-top-right-radius:0;border-bottom-right-radius:0}
@@ -205,7 +212,7 @@ section.block{display:flex;flex-direction:column;gap:12px;margin-bottom:28px}
   <div class="stats" id="stats"></div>
   <nav class="tabs" role="tablist" id="tabs">
     <button role="tab" data-tab="hoy" aria-selected="true">Hoy</button>
-    <button role="tab" data-tab="especial" aria-selected="false"><span class="lg">Recetas </span>especiales</button>
+    <button role="tab" data-tab="especial" aria-selected="false">Recetas</button>
     <button role="tab" data-tab="semana" aria-selected="false"><span class="lg">Plan </span>semana</button>
     <button role="tab" data-tab="compra" aria-selected="false">Compra</button>
     <button role="tab" data-tab="historial" aria-selected="false">Historial</button>
@@ -325,7 +332,15 @@ const R = [
 ];
 const REC = Object.fromEntries(R.map(r=>[r[0],{id:r[0],name:r[1],cat:r[2],meal:r[3],min:r[4],ings:r[5],steps:r[6]}]));
 SP.forEach(r=>REC[r[0]]={id:r[0],name:r[1],cat:r[2],meal:"cn",occ:r[3],min:r[4],ings:r[5],steps:r[6],tip:r[7],special:true});
-const QUICK = Object.values(REC).filter(r=>!r.special);
+let QUICK = [];
+// Recetas propias: viven en S.myRecipes y se mezclan con el recetario fijo en REC
+function syncMine(){
+  for(const id of Object.keys(REC)) if(REC[id].mine) delete REC[id];
+  S.myRecipes=S.myRecipes||[];
+  for(const r of S.myRecipes) REC[r.id]=Object.assign({steps:[]},r,{mine:true});
+  QUICK=Object.values(REC).filter(r=>!r.special);
+  S.plan.slots.forEach(s=>{ if(s.rid&&!REC[s.rid]){ s.rid=null; s.lock=false; } });
+}
 const DAYS = ["Lunes","Martes","Miércoles","Jueves","Viernes","Sábado","Domingo"];
 
 /* ---------- Estado ---------- */
@@ -337,11 +352,11 @@ const todayIso = ()=>iso(new Date());
 function defaults(){
   const slots=[];
   for(let i=0;i<7;i++){ slots.push({day:i,meal:"comida",on:i<4,rid:null,lock:false,done:false}); slots.push({day:i,meal:"cena",on:true,rid:null,lock:false,done:false}); }
-  return {v:1, example:true, pantry:["huevos","arroz","pasta","cebolla","ajo","frito","atun","patatas","pollo","lechuga","tomate","garbanzos"], history:[], plan:{week:iso(weekStart()), slots}, shopDone:[], shopExtra:[], prices:{}, custom:[], settings:{pastaMax:1}};
+  return {v:1, example:true, pantry:["huevos","arroz","pasta","cebolla","ajo","frito","atun","patatas","pollo","lechuga","tomate","garbanzos"], history:[], plan:{week:iso(weekStart()), slots}, shopDone:[], shopExtra:[], prices:{}, custom:[], myRecipes:[], settings:{pastaMax:1}};
 }
 let S = defaults();
 try{ const raw=localStorage.getItem("qch-state"); if(raw) S=Object.assign(defaults(),JSON.parse(raw)); }catch(e){}
-syncCustom();
+syncCustom(); syncMine();
 const STANDALONE=!window.claude;
 let dbRef=null, writing=false, pending=false, timer=null;
 function persist(){
@@ -366,16 +381,28 @@ const has = k=>S.pantry.includes(k);
 const ingName = k=>ING[k]?ING[k][0]:k;
 const norm = t=>String(t).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim();
 function syncCustom(){ S.custom=S.custom||[]; for(const c of S.custom) ING[c.k]=[c.n,"mine"]; }
+// Busca un ingrediente de la lista por nombre ("pollo", "huevo", "Nata para cocinar"…)
+function matchIng(name){
+  const n=norm(name), keys=Object.keys(ING);
+  return keys.find(k=>k===n||norm(ING[k][0])===n)
+    || keys.find(k=>norm(ING[k][0]).startsWith(n+" ")||[n+"s",n+"es",n.replace(/s$/,""),n.replace(/es$/,"")].includes(k));
+}
+function newCustom(name){
+  const k="x_"+norm(name).replace(/[^a-z0-9]+/g,"_").slice(0,40);
+  if(!S.custom.some(c=>c.k===k)) S.custom.push({k,n:name.charAt(0).toUpperCase()+name.slice(1)});
+  syncCustom(); return k;
+}
 function addCustom(name){
   name=name.trim().replace(/\s+/g," "); if(!name) return;
-  const n=norm(name);
-  const hit=Object.entries(ING).find(([k,[lbl]])=>norm(lbl)===n||norm(lbl).startsWith(n+" "));
-  if(hit){ if(!has(hit[0])) S.pantry.push(hit[0]); persist(); toast(`${hit[1][0]} marcado`); return; }
-  const k="x_"+n.replace(/[^a-z0-9]+/g,"_").slice(0,40);
-  if(!S.custom.some(c=>c.k===k)) S.custom.push({k,n:name.charAt(0).toUpperCase()+name.slice(1)});
-  syncCustom(); if(!has(k)) S.pantry.push(k); persist(); toast(`${name} añadido`);
+  const hit=matchIng(name);
+  if(hit){ if(!has(hit)) S.pantry.push(hit); persist(); toast(`${ING[hit][0]} marcado`); return; }
+  const k=newCustom(name); if(!has(k)) S.pantry.push(k); persist(); toast(`${name} añadido`);
 }
-function removeCustom(k){ S.custom=S.custom.filter(c=>c.k!==k); S.pantry=S.pantry.filter(x=>x!==k); delete ING[k]; persist(); }
+function removeCustom(k){
+  const used=(S.myRecipes||[]).find(r=>r.ings.includes(k));
+  if(used){ toast(`Lo usa tu receta «${used.name}»`); return; }
+  S.custom=S.custom.filter(c=>c.k!==k); S.pantry=S.pantry.filter(x=>x!==k); delete ING[k]; persist();
+}
 const catDot = c=>`<span class="cat" style="--dot:var(--c-${CATS[c]?c:"verdura"})"><i></i>${esc(CATS[c]||c)}</span>`;
 function toast(t){const el=document.getElementById("toast");el.textContent=t;el.hidden=false;clearTimeout(toast._t);toast._t=setTimeout(()=>el.hidden=true,2200)}
 function thisWeekHistory(){const ws=iso(weekStart());return S.history.filter(h=>h.d>=ws)}
@@ -431,10 +458,10 @@ function card(r,info,actions){
   else if(ds<7) tags.push(`<span class="tag">Hace ${ds} día${ds===1?"":"s"}</span>`);
   return `<article class="card">
     <div class="row between"><h3>${esc(r.name)}</h3></div>
-    <div class="meta">${catDot(r.cat)}<span>${r.min} min</span><span>${r.special?occLabel(r.occ):r.meal==="c"?"Comida":r.meal==="n"?"Cena":"Comida o cena"}</span>${tags.join("")}</div>
+    <div class="meta">${catDot(r.cat)}<span>${r.min} min</span><span>${r.special?occLabel(r.occ):r.meal==="c"?"Comida":r.meal==="n"?"Cena":"Comida o cena"}</span>${r.mine?`<span class="tag new">Tuya</span>`:""}${tags.join("")}</div>
     <div class="meter" title="Tienes ${pct}% de los ingredientes"><span style="width:${pct}%"></span></div>
     <div class="ings">${r.ings.map(k=>`<span class="ing ${has(k)?"have":"miss"}">${esc(ingName(k))}</span>`).join("")}</div>
-    <details><summary>Cómo se hace</summary><ol>${r.steps.map(s=>`<li>${esc(s)}</li>`).join("")}</ol>${r.tip?`<p class="tip"><b>Para quedar bien:</b> ${esc(r.tip)}</p>`:""}</details>
+    ${r.steps.length||r.tip?`<details><summary>Cómo se hace</summary>${r.steps.length?`<ol>${r.steps.map(s=>`<li>${esc(s)}</li>`).join("")}</ol>`:""}${r.tip?`<p class="tip"><b>Para quedar bien:</b> ${esc(r.tip)}</p>`:""}</details>`:""}
     <div class="foot"><span class="small muted">${info.miss.length?"Te falta: "+esc(info.miss.map(ingName).join(", ")):"Lo tienes todo"}</span>${actions}</div>
   </article>`;
 }
@@ -457,7 +484,7 @@ function pantryHTML(open){
       <form id="addIng" class="row" style="gap:6px"><input type="text" id="newIng" placeholder="¿No está? Escríbelo: p. ej. sobrasada" aria-label="Añadir ingrediente" autocomplete="off"><button class="btn sm primary" type="submit">Añadir</button></form>
     </div>
     ${mine.length?`<div class="stack mine" style="gap:6px;margin-top:14px"><span class="label">Añadidos por ti</span><div class="chips">${mine.map(c=>`<span class="mchip"><button class="chip" data-ing="${c.k}" aria-pressed="${has(c.k)}">${esc(c.n)}</button><button class="x" data-rmcustom="${c.k}" aria-label="Quitar ${esc(c.n)} de la lista">×</button></span>`).join("")}</div></div>`:""}
-    <p class="small muted nores" id="noRes" hidden>No está en la lista. Escríbelo en «Añadir» y lo tendré en cuenta para las ideas de Claude.</p>
+    <p class="small muted nores" id="noRes" hidden>No está en la lista. Escríbelo en «Añadir» y lo tendré en cuenta en tus recetas y en las ideas de Claude.</p>
     <div class="pgroups">${Object.entries(GROUPS).filter(([g])=>g!=="esp"&&g!=="mine").map(([g,label])=>chipGroup(byG,g,label)).join("")}</div>
     <details class="subp" id="pantryEsp" ${document.getElementById("pantryEsp")?.open?"open":""}><summary class="small"><b>Ingredientes para recetas especiales</b> <span class="muted">(${espN} marcados)</span></summary><div style="margin-top:10px">${chipGroup(byG,"esp","Carnes, quesos, repostería y otros")}</div></details>
     <div class="row" style="margin-top:12px"><button class="btn sm ghost" data-act="clear-pantry">Vaciar todo</button></div>
@@ -466,9 +493,9 @@ function pantryHTML(open){
 function renderHoy(){
   const pantryOpen=document.getElementById("pantry")?.open ?? S.example;
   const want = mealNow==="comida"?"c":"n";
-  const list = R.map(r=>REC[r[0]]).filter(r=>r.meal.includes(want)).map(r=>({r,info:score(r)})).sort((a,b)=>b.info.s-a.info.s);
+  const list = QUICK.filter(r=>r.meal.includes(want)).map(r=>({r,info:score(r)})).sort((a,b)=>b.info.s-a.info.s);
   const top = list.slice(0, showAll?list.length:6);
-  const fresh = R.map(r=>REC[r[0]]).filter(r=>r.cat!=="pasta"&&daysSince(r.id)===Infinity&&!top.some(t=>t.r.id===r.id)).map(r=>({r,info:score(r)})).filter(x=>x.info.miss.length<=2).sort((a,b)=>a.info.miss.length-b.info.miss.length||b.info.s-a.info.s).slice(0,3);
+  const fresh = QUICK.filter(r=>r.cat!=="pasta"&&daysSince(r.id)===Infinity&&!top.some(t=>t.r.id===r.id)).map(r=>({r,info:score(r)})).filter(x=>x.info.miss.length<=2).sort((a,b)=>a.info.miss.length-b.info.miss.length||b.info.s-a.info.s).slice(0,3);
   const act = r=>`<button class="btn sm primary" data-cook="${r.id}">Lo cocino</button>`;
   document.getElementById("view").innerHTML=`
     ${pantryHTML(pantryOpen)}
@@ -553,14 +580,20 @@ function slotOptions(){
   const ws=planWeekStart();
   return S.plan.slots.map((s,i)=>`<option value="${i}" ${s.day>=5&&s.meal==="cena"&&i===11?"selected":""}>${DAYS[s.day]} ${addDays(ws,s.day).getDate()} · ${s.meal}${s.rid?" (sustituye)":""}</option>`).join("");
 }
+let espView="especiales", formOpen=false, editId=null;
+const planActs=(r,opts)=>`<div class="row" style="gap:6px"><select class="btn sm" id="slotSel-${r.id}" aria-label="Día del plan">${opts}</select><button class="btn sm" data-toplan="${r.id}">Al plan</button><button class="btn sm" data-tobuy="${r.id}">Falta → compra</button><button class="btn sm primary" data-cook="${r.id}">Lo cocino</button></div>`;
 function renderEspecial(){
   ensureWeek();
-  const list=SP.map(r=>REC[r[0]]).filter(r=>espFilter==="todas"||(espFilter==="postre"?r.cat==="postre":r.occ.includes(espFilter)&&r.cat!=="postre")).map(r=>({r,info:score(r)})).sort((a,b)=>a.info.miss.length-b.info.miss.length);
+  const v=(k,l)=>`<button data-espv="${k}" aria-pressed="${espView===k}">${l}</button>`;
+  const views=`<div class="seg" role="group" aria-label="Qué recetas ver" style="align-self:flex-start">${v("especiales","Especiales")}${v("mias","Mis recetas")}</div>`;
+  if(espView==="mias") return renderMias(views);
+  const list=Object.values(REC).filter(r=>r.special).filter(r=>espFilter==="todas"||(espFilter==="postre"?r.cat==="postre":r.occ.includes(espFilter)&&r.cat!=="postre")).map(r=>({r,info:score(r)})).sort((a,b)=>a.info.miss.length-b.info.miss.length);
   const opts=slotOptions();
-  const act=r=>`<div class="row" style="gap:6px"><select class="btn sm" id="slotSel-${r.id}" aria-label="Día del plan">${opts}</select><button class="btn sm" data-toplan="${r.id}">Al plan</button><button class="btn sm" data-tobuy="${r.id}">Falta → compra</button><button class="btn sm primary" data-cook="${r.id}">Lo cocino</button></div>`;
+  const act=r=>planActs(r,opts);
   const f=(k,l)=>`<button data-espf="${k}" aria-pressed="${espFilter===k}">${l}</button>`;
   document.getElementById("view").innerHTML=`
     <section class="block">
+      ${views}
       <div class="row between">
         <div><h2>Recetas especiales</h2><p class="small muted" style="margin:2px 0 0">Para 2 personas, con más tiempo: una cena con tu novia o un plan de fin de semana. No cuentan para el límite del día a día.</p></div>
         <div class="seg" role="group" aria-label="Filtrar">${f("todas","Todas")}${f("p","En pareja")}${f("f","Finde")}${f("postre","Postres")}</div>
@@ -568,6 +601,54 @@ function renderEspecial(){
       <div class="cards">${list.map(x=>card(x.r,x.info,act(x.r))).join("")}</div>
     </section>
     ${aiBlock("esp","Sorpréndeme","Claude te propone 3 recetas especiales pensadas para la ocasión.","Opcional: le encanta lo picante, es vegetariana, aniversario…","Proponme algo")}`;
+}
+function renderMias(views){
+  const opts=slotOptions();
+  const list=S.myRecipes.map(r=>REC[r.id]).map(r=>({r,info:score(r)}));
+  const act=r=>`<div class="stack" style="gap:6px">${planActs(r,opts)}<div class="row" style="gap:6px"><button class="btn sm ghost" data-redit="${r.id}">Editar</button><button class="btn sm ghost" data-rdel="${r.id}">Borrar</button></div></div>`;
+  document.getElementById("view").innerHTML=`
+    <section class="block">
+      ${views}
+      <div class="row between">
+        <div><h2>Mis recetas</h2><p class="small muted" style="margin:2px 0 0">Las de diario salen en <b>Hoy</b> y en el plan semanal; las especiales, junto a las recetas especiales.</p></div>
+        ${formOpen?"":`<button class="btn primary" data-act="rform-new">+ Nueva receta</button>`}
+      </div>
+      ${formOpen?recipeForm():""}
+      ${list.length?`<div class="cards">${list.map(x=>card(x.r,x.info,act(x.r))).join("")}</div>`:formOpen?"":`<p class="note">Aún no tienes recetas propias. Añade las que sueles cocinar y la app las tendrá en cuenta para sugerirte platos, planificar la semana y hacer la lista de la compra.</p>`}
+    </section>`;
+}
+function recipeForm(){
+  const r=editId?S.myRecipes.find(x=>x.id===editId):null;
+  const kind=r?(r.special?"sp":r.meal):"cn";
+  const o=(val,l,cur)=>`<option value="${val}" ${val===cur?"selected":""}>${l}</option>`;
+  return `<form class="rform" id="recipeForm">
+    <h2 class="full">${r?"Editar receta":"Nueva receta"}</h2>
+    <label class="full">Nombre<input type="text" id="rfName" maxlength="80" value="${esc(r?.name)}" placeholder="p. ej. Pollo al pimentón de mi madre" autocomplete="off"></label>
+    <label>Tipo de plato<select id="rfCat">${Object.entries(CATS).map(([k,l])=>o(k,l,r?.cat||"pollo")).join("")}</select></label>
+    <label>Cuándo<select id="rfKind">${[["cn","Comida o cena"],["c","Solo comida"],["n","Solo cena"],["sp","Especial (pareja o finde)"]].map(([k,l])=>o(k,l,kind)).join("")}</select></label>
+    <label>Minutos<input type="number" id="rfMin" min="1" max="600" inputmode="numeric" value="${r?.min||20}"></label>
+    <label class="full"><span>Ingredientes <i>(separados por comas)</i></span><textarea id="rfIngs" rows="2" placeholder="pollo, cebolla, nata, curry">${esc(r?r.ings.map(ingName).join(", "):"")}</textarea><span class="small">No hace falta poner aceite, sal, pimienta ni especias. Si alguno no está en la despensa, se añade a «Añadidos por ti».</span></label>
+    <label class="full"><span>Pasos <i>(opcional, uno por línea)</i></span><textarea id="rfSteps" rows="4">${esc(r?r.steps.join("\n"):"")}</textarea></label>
+    <label class="full"><span>Truco <i>(opcional)</i></span><input type="text" id="rfTip" maxlength="200" value="${esc(r?.tip)}" autocomplete="off"></label>
+    <div class="row full"><button class="btn primary" type="submit">Guardar receta</button><button class="btn ghost" type="button" data-act="rform-cancel">Cancelar</button></div>
+  </form>`;
+}
+function saveRecipe(){
+  const g=id=>document.getElementById(id).value;
+  const name=g("rfName").trim().replace(/\s+/g," ");
+  if(!name) return toast("Ponle un nombre");
+  const raw=g("rfIngs").split(/[,;\n]+/).map(x=>x.trim().replace(/\s+/g," ")).filter(Boolean);
+  if(!raw.length) return toast("Añade al menos un ingrediente");
+  const ings=[...new Set(raw.map(x=>matchIng(x)||newCustom(x)))];
+  const kind=g("rfKind"), tip=g("rfTip").trim();
+  const r={id:editId||"m"+Date.now().toString(36), name, cat:g("rfCat"), meal:kind==="sp"?"cn":kind,
+    min:Math.min(600,Math.max(1,Math.round(+g("rfMin")||20))), ings, steps:g("rfSteps").split("\n").map(x=>x.trim()).filter(Boolean)};
+  if(kind==="sp"){ r.special=true; r.occ="pf"; }
+  if(tip) r.tip=tip;
+  const i=S.myRecipes.findIndex(x=>x.id===r.id);
+  if(i>=0) S.myRecipes[i]=r; else S.myRecipes.push(r);
+  toast(i>=0?"Receta guardada":`${name} añadida a tus recetas`);
+  editId=null; formOpen=false; syncMine(); persist(); render();
 }
 
 /* ---------- Pestaña SEMANA ---------- */
@@ -718,6 +799,9 @@ document.addEventListener("click",e=>{
   if(d.meal){ mealNow=d.meal; aiAll.hoy.items=null; render(); return; }
   if(d.rmcustom){ removeCustom(d.rmcustom); render(); return; }
   if(d.espf){ espFilter=d.espf; render(); return; }
+  if(d.espv){ espView=d.espv; render(); return; }
+  if(d.redit){ editId=d.redit; formOpen=true; render(); document.getElementById("recipeForm")?.scrollIntoView({behavior:"smooth",block:"start"}); return; }
+  if(d.rdel){ const r=REC[d.rdel]; if(!confirm(`¿Borrar «${r.name}» de tus recetas?`)) return; S.myRecipes=S.myRecipes.filter(x=>x.id!==d.rdel); if(editId===d.rdel){editId=null;formOpen=false} syncMine(); persist(); toast("Receta borrada"); render(); return; }
   if(d.ai){ askAI(d.ai); return; }
   if(d.toplan){ const i=+document.getElementById("slotSel-"+d.toplan).value, s=S.plan.slots[i]; Object.assign(s,{on:true,rid:d.toplan,lock:true,done:false}); persist(); toast(`${REC[d.toplan].name}: ${DAYS[s.day].toLowerCase()} ${s.meal}`); render(); return; }
   if(d.tobuy){ const r=REC[d.tobuy], miss=r.ings.filter(k=>!has(k)); S.shopExtra=(S.shopExtra||[]).filter(x=>x.why!==r.name).concat(miss.map(k=>({k,why:r.name}))); persist(); toast(miss.length?`${miss.length} ingredientes a la lista`:"Ya lo tienes todo"); return; }
@@ -731,6 +815,8 @@ document.addEventListener("click",e=>{
   if(d.slotDone!=null){ const i=+d.slotDone, s=S.plan.slots[i], r=REC[s.rid]; s.done=true; S.history.push({d:iso(addDays(planWeekStart(),s.day)),meal:s.meal,rid:r.id,name:r.name,cat:r.cat}); S.history.sort((a,b)=>a.d.localeCompare(b.d)); persist(); toast(`Apuntado: ${r.name}`); render(); return; }
   switch(d.act){
     case "more": showAll=!showAll; render(); break;
+    case "rform-new": editId=null; formOpen=true; render(); document.getElementById("rfName")?.focus(); break;
+    case "rform-cancel": editId=null; formOpen=false; render(); break;
     case "clear-pantry": S.pantry=[]; persist(); render(); break;
     case "gen": generate(); render(); toast("Semana generada"); break;
     case "ai-stop": aiCtl?.abort(); break;
@@ -742,7 +828,7 @@ document.addEventListener("change",e=>{
   const t=e.target;
   if(t.dataset.price){ const v=parseFloat(String(t.value).replace(",",".")); if(v>0) S.prices[t.dataset.price]=Math.round(v*100)/100; else delete S.prices[t.dataset.price]; persist(); render(); return; }
   if(t.dataset.buy){ const k=t.dataset.buy; if(!has(k)) S.pantry.push(k); S.shopExtra=(S.shopExtra||[]).filter(x=>x.k!==k); persist(); toast(`${ingName(k)} a la despensa`); setTimeout(render,250); }
-  if(t.id==="importFile"&&t.files[0]){ const fr=new FileReader(); fr.onload=()=>{ try{ const d=JSON.parse(fr.result); if(!d||!Array.isArray(d.pantry)) throw 0; S=Object.assign(defaults(),d); syncCustom(); persist(); render(); toast("Copia cargada"); }catch(_){ toast("Ese archivo no es una copia válida"); } }; fr.readAsText(t.files[0]); return; }
+  if(t.id==="importFile"&&t.files[0]){ const fr=new FileReader(); fr.onload=()=>{ try{ const d=JSON.parse(fr.result); if(!d||!Array.isArray(d.pantry)) throw 0; S=Object.assign(defaults(),d); syncCustom(); syncMine(); persist(); render(); toast("Copia cargada"); }catch(_){ toast("Ese archivo no es una copia válida"); } }; fr.readAsText(t.files[0]); return; }
   if(t.id==="pastaMax"){ S.settings.pastaMax=+t.value; persist(); render(); }
   if(t.id==="hRec"){ const o=t.value==="__otro"; document.getElementById("hName").hidden=!o; document.getElementById("hCat").hidden=!o; }
 });
@@ -758,6 +844,7 @@ function applySearch(){
 }
 document.addEventListener("submit",e=>{
   if(e.target.id==="addIng"){ e.preventDefault(); pq=""; const v=document.getElementById("newIng").value; addCustom(v); render(); document.getElementById("pantry").open=true; return; }
+  if(e.target.id==="recipeForm"){ e.preventDefault(); saveRecipe(); return; }
   if(e.target.id!=="histForm") return; e.preventDefault();
   const v=document.getElementById("hRec").value; if(!v) return toast("Elige un plato");
   const meal=document.getElementById("hMeal").value, dte=document.getElementById("hDate").value||todayIso();
@@ -786,7 +873,7 @@ render();
     const id=await user.id(); if(!id) return;
     dbRef=db.doc("data/users/"+id+"/state");
     const snap=await dbRef.get();
-    if(snap.exists){ S=Object.assign(defaults(),JSON.parse(JSON.stringify(snap.data()))); S.prices=S.prices||{}; S.shopExtra=S.shopExtra||[]; syncCustom(); try{localStorage.setItem("qch-state",JSON.stringify(S))}catch(_){ } render(); setSync("Guardado en tu cuenta"); }
+    if(snap.exists){ S=Object.assign(defaults(),JSON.parse(JSON.stringify(snap.data()))); S.prices=S.prices||{}; S.shopExtra=S.shopExtra||[]; syncCustom(); syncMine(); try{localStorage.setItem("qch-state",JSON.stringify(S))}catch(_){ } render(); setSync("Guardado en tu cuenta"); }
     else if(!S.example){ flush(); } else setSync("Se guardará en tu cuenta al hacer cambios");
   }catch(e){ dbRef=null; }
 })();
