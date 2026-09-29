@@ -239,7 +239,7 @@ const ING = {
   yogur:["Yogur natural","lac"], griego:["Yogur griego","lac"], qcrema:["Queso crema","lac"], burrata:["Burrata","lac"], feta:["Queso feta","lac"],
   caldo:["Caldo (brik o pastilla)","otros"], aceitunas:["Aceitunas","otros"], pesto:["Pesto","otros"], ketchup:["Ketchup","otros"], barbacoa:["Salsa barbacoa","otros"], picante:["Salsa picante","otros"], vinagre:["Vinagre","otros"], frutos_secos:["Frutos secos","otros"],
   triturado:["Tomate triturado","otros"], frito:["Tomate frito","otros"], soja:["Salsa de soja","otros"], curry:["Curry","otros"], mayo:["Mayonesa","otros"],
-  solomillo:["Solomillo de cerdo","esp"], entrecot:["Entrecot","esp"], muslos:["Muslos de pollo","esp"], salmon:["Salmón","esp"], carrilleras:["Carrilleras","esp"], magret:["Magret de pato","esp"],
+  solomillo:["Solomillo de cerdo","esp"], entrecot:["Entrecot","esp"], muslos:["Muslos de pollo","esp"], salmon:["Salmón","prot"], carrilleras:["Carrilleras","esp"], magret:["Magret de pato","esp"],
   mantequilla:["Mantequilla","lac"], leche:["Leche","lac"], harina:["Harina","esp"], levadura:["Levadura de panadería","esp"], azucar:["Azúcar","esp"], miel:["Miel","otros"], mostaza:["Mostaza","otros"], vino:["Vino (blanco o tinto)","esp"],
   parmesano:["Parmesano","esp"], gorgonzola:["Gorgonzola","esp"], qcabra:["Rulo de cabra","esp"], mascarpone:["Mascarpone","esp"], nueces:["Nueces","esp"], coco:["Leche de coco","esp"], currorojo:["Pasta de curry rojo","esp"],
   esparragos:["Espárragos verdes","esp"], padron:["Pimientos de Padrón","esp"], rucula:["Rúcula","esp"], pina:["Piña","esp"], frutosrojos:["Frutos rojos","esp"], romero:["Romero","esp"], guindilla:["Guindilla","esp"],
@@ -328,7 +328,23 @@ const R = [
  ["r56","Espaguetis carbonara","pasta","c",15,["pasta","bacon","huevos","rallado"],["Cuece la pasta.","Dora el bacon. Bate yemas con queso y pimienta.","Fuera del fuego mezcla todo con un poco de agua de cocción."]],
  ["r57","Pasta con atún y tomate","pasta","c",15,["pasta","atun","frito"],["Cuece la pasta.","Calienta tomate con el atún.","Mezcla."]],
  ["r58","Pasta con brócoli y ajo","pasta","c",15,["pasta","brocoli","ajo","rallado"],["Cuece la pasta y el brócoli juntos los últimos 4 min.","Dora ajo en aceite.","Mezcla con queso rallado."]],
- ["r59","Ensalada de pasta","pasta","cn",15,["pasta","atun","maiz","tomate"],["Cuece la pasta y enfríala.","Pica el tomate.","Mezcla con atún y maíz, aliña."]]
+ ["r59","Ensalada de pasta","pasta","cn",15,["pasta","atun","maiz","tomate"],["Cuece la pasta y enfríala.","Pica el tomate.","Mezcla con atún y maíz, aliña."]],
+ ["r60","Salmón a la plancha con ensalada","pescado","cn",15,["salmon","lechuga","tomate","limon"],["Seca el salmón y sálalo.","Plancha caliente, piel abajo 4 min y 2-3 min por el otro lado.","Ensalada aliñada y limón por encima del salmón."]],
+ ["r61","Bowl de salmón con arroz y aguacate","pescado","c",20,["salmon","arroz","aguacate","pepino","soja"],["Cuece el arroz.","Salmón en dados, dorado 3-4 min con un chorrito de soja.","Monta el bol con aguacate y pepino."]],
+ ["r62","Salmón con patatas al micro","pescado","c",20,["salmon","patatas","limon"],["Patatas en rodajas al micro 8 min con sal y aceite, luego a dorar.","Salmón a la plancha 3 min por lado.","Limón y pimienta al servir."]],
+ ["r63","Salmón en papillote al micro con calabacín","pescado","n",12,["salmon","calabacin","limon"],["Calabacín en rodajas finas en un recipiente con tapa.","Salmón encima con sal, aceite y rodajas de limón.","Tapa y micro 4-5 min a máxima potencia."]],
+ ["r64","Salchichas con tomate y patatas","carne","c",20,["salchichas","frito","patatas"],["Patatas en dados al micro 8 min y luego a dorar.","Dora las salchichas en rodajas.","Añade tomate frito, 3 min, y mezcla con las patatas."]],
+ ["r65","Hamburguesa con patatas fritas","carne","cn",20,["hamburguesas","pan","patatas_fritas","lechuga"],["Patatas al horno o freidora según el paquete.","Hamburguesa a la plancha 3-4 min por lado.","Monta en el pan con lechuga."]],
+ ["r66","Ensalada de caballa, patata y tomate","pescado","cn",15,["caballa","patatas","tomate","cebolla"],["Patata en dados al micro 7 min y deja templar.","Pica tomate y cebolla.","Mezcla con la caballa y aliña con aceite y vinagre."]],
+ ["r67","Tostas de sardinas y tomate","pescado","n",10,["sardinas","pan","tomate"],["Tuesta el pan.","Tomate rallado con sal y aceite encima.","Sardinas por encima y pimienta."]],
+ ["r68","Ensalada de arroz con mejillones","pescado","c",20,["mejillones","arroz","pimiento","maiz"],["Cuece el arroz y enfríalo bajo el grifo.","Pica el pimiento.","Mezcla con los mejillones y su escabeche y el maíz."]],
+ ["r69","Calamares a la plancha con ajo y perejil","pescado","cn",15,["calamares","ajo","perejil","limon"],["Calamares en anillas bien secos.","Plancha muy caliente 2-3 min.","Ajo y perejil picados con aceite por encima, y limón."]],
+ ["r70","Secreto a la plancha con pimientos","carne","c",20,["secreto","pimiento","patatas"],["Patatas en rodajas al micro 8 min, luego a dorar.","Pimiento en tiras a fuego medio.","Secreto a la plancha muy caliente 3 min por lado, sal gorda."]],
+ ["r71","Sándwich mixto con ensalada","carne","n",10,["pan_molde","fiambre","queso","lechuga"],["Monta el sándwich con fiambre y queso.","Dóralo en la sartén con un poco de aceite o mantequilla, tapado.","Acompaña con lechuga aliñada."]],
+ ["r72","Ensalada de surimi y aguacate","pescado","n",10,["surimi","aguacate","lechuga","maiz"],["Surimi en tiras.","Aguacate en dados.","Mezcla todo sobre la lechuga con un poco de mayonesa o limón."]],
+ ["r73","Bol de hummus con huevo y verduras","legumbre","n",10,["hummus","huevos","pepino","pan"],["Huevo cocido 10 min o a la plancha.","Extiende el hummus en un plato con pimentón y aceite.","Encima huevo y pepino; pan tostado para mojar."]],
+ ["r74","Arroz salteado con edamame y huevo","legumbre","c",20,["edamame","arroz","huevos","soja"],["Cuece el arroz (o usa de ayer).","Saltea el edamame 3 min.","Añade huevo revuelto, arroz y soja."]],
+ ["r75","Ensalada griega con feta","verdura","n",10,["feta","tomate","pepino","aceitunas","cebolla"],["Trocea tomate, pepino y cebolla.","Añade aceitunas y feta en dados.","Aceite, orégano y sal."]]
 ];
 const REC = Object.fromEntries(R.map(r=>[r[0],{id:r[0],name:r[1],cat:r[2],meal:r[3],min:r[4],ings:r[5],steps:r[6]}]));
 SP.forEach(r=>REC[r[0]]={id:r[0],name:r[1],cat:r[2],meal:"cn",occ:r[3],min:r[4],ings:r[5],steps:r[6],tip:r[7],special:true});
@@ -495,6 +511,9 @@ function renderHoy(){
   const want = mealNow==="comida"?"c":"n";
   const all = QUICK.filter(r=>r.meal.includes(want)).map(r=>({r,info:score(r)})).sort((a,b)=>b.info.s-a.info.s);
   const list = onlyHave ? all.filter(x=>!x.info.miss.length) : all;
+  // Proteínas o ingredientes tuyos marcados que no salen en ningún plato rápido
+  const orphans = S.pantry.filter(k=>ING[k]&&["prot","leg","mine"].includes(ING[k][1])&&!QUICK.some(r=>r.ings.includes(k)));
+  const orphanNote = orphans.length?`<p class="note" style="margin:0">No tengo platos rápidos con ${esc(orphans.map(ingName).join(", "))}. ${sampleFn?"Pide ideas a Claude más abajo o añade":"Añade"} tu propia receta en Recetas → Mis recetas.</p>`:"";
   const top = list.slice(0, showAll?list.length:6);
   const fresh = QUICK.filter(r=>r.cat!=="pasta"&&daysSince(r.id)===Infinity&&!top.some(t=>t.r.id===r.id)).map(r=>({r,info:score(r)})).filter(x=>x.info.miss.length<=2).sort((a,b)=>a.info.miss.length-b.info.miss.length||b.info.s-a.info.s).slice(0,3);
   const act = r=>`<button class="btn sm primary" data-cook="${r.id}">Lo cocino</button>`;
@@ -508,6 +527,7 @@ function renderHoy(){
           <div class="seg" role="group" aria-label="Comida o cena"><button data-meal="comida" aria-pressed="${mealNow==="comida"}">Comida</button><button data-meal="cena" aria-pressed="${mealNow==="cena"}">Cena</button></div>
         </div>
       </div>
+      ${orphanNote}
       ${list.length?`<div class="cards">${top.map(x=>card(x.r,x.info,act(x.r))).join("")}</div>`:`<p class="note" style="margin:0">Con lo que tienes marcado no sale ningún plato completo. Marca más ingredientes o pulsa «Todas» para ver los que casi tienes.</p>`}
       ${list.length>6?`<div><button class="btn sm ghost" data-act="more">${showAll?"Ver menos":"Ver las "+list.length+" opciones"}</button></div>`:""}
     </section>
@@ -803,8 +823,7 @@ document.addEventListener("click",e=>{
   if(d.meal){ mealNow=d.meal; aiAll.hoy.items=null; render(); return; }
   if(d.rmcustom){ removeCustom(d.rmcustom); render(); return; }
   if(d.espf){ espFilter=d.espf; render(); return; }
-  if(d.espv){ espView=d.espv; render(); return; }
-  if(d.redit){ editId=d.redit; formOpen=true; render(); document.getElementById("recipeForm")?.scrollIntoView({behavior:"smooth",block:"start"}); return; }
+  if(d.espv){ espView=d.espv; render(); return; }  if(d.redit){ editId=d.redit; formOpen=true; render(); document.getElementById("recipeForm")?.scrollIntoView({behavior:"smooth",block:"start"}); return; }
   if(d.rdel){ const r=REC[d.rdel]; if(!confirm(`¿Borrar «${r.name}» de tus recetas?`)) return; S.myRecipes=S.myRecipes.filter(x=>x.id!==d.rdel); if(editId===d.rdel){editId=null;formOpen=false} syncMine(); persist(); toast("Receta borrada"); render(); return; }
   if(d.ai){ askAI(d.ai); return; }
   if(d.toplan){ const i=+document.getElementById("slotSel-"+d.toplan).value, s=S.plan.slots[i]; Object.assign(s,{on:true,rid:d.toplan,lock:true,done:false}); persist(); toast(`${REC[d.toplan].name}: ${DAYS[s.day].toLowerCase()} ${s.meal}`); render(); return; }
