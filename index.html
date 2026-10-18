@@ -25,7 +25,7 @@
   --bg:#F2F5F0; --surface:#FFFFFF; --sunk:#E8EDE6; --ink:#18201A; --muted:#5C685E; --line:#D6DDD4;
   --accent:#2C6A3D; --accent-ink:#FFFFFF; --accent-soft:#DDEDE0;
   --warn:#A94F17; --warn-soft:#F7E4D6; --ok:#2C6A3D;
-  --c-pollo:#D9A23A; --c-carne:#B8503B; --c-huevo:#E6C84A; --c-legumbre:#8C6A3F; --c-pescado:#3E86B5; --c-pasta:#D9772B; --c-arroz:#9AA3A0; --c-verdura:#4E9A55; --c-postre:#A0527A;
+  --c-pollo:#D9A23A; --c-carne:#B8503B; --c-huevo:#E6C84A; --c-legumbre:#8C6A3F; --c-pescado:#3E86B5; --c-pasta:#D9772B; --c-arroz:#9AA3A0; --c-verdura:#4E9A55; --c-postre:#A0527A; --c-snack:#7A6FC2;
   --f-display:"Bricolage Grotesque", "Figtree", system-ui, sans-serif;
   --f-body:"Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
   --r:12px;
@@ -82,6 +82,22 @@ section.block{display:flex;flex-direction:column;gap:12px;margin-bottom:28px}
 .chip[aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent);color:var(--ink);font-weight:600}
 .chip[aria-pressed="true"]::before{content:"✓ ";color:var(--accent)}
 .note{font-size:13px;background:var(--accent-soft);border-radius:8px;padding:8px 12px}
+/* flechita de desplegable: apunta abajo cerrado, arriba abierto */
+.chev{display:inline-block;width:7px;height:7px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:translateY(-2px) rotate(45deg);flex:none}
+details[open]>summary .chev{transform:translateY(1px) rotate(-135deg)}
+@media (prefers-reduced-motion:no-preference){.chev{transition:transform .2s}}
+.pgroups{align-items:start}
+.pg{border:1px solid var(--line);border-radius:10px;padding:8px 12px;background:var(--bg)}
+.pg>summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:8px;min-height:28px}
+.pg>summary::-webkit-details-marker,.rg>summary::-webkit-details-marker{display:none}
+.pg>summary .label{flex:1}
+.pg .chips{margin-top:8px;padding-bottom:4px}
+/* grupos del recetario */
+.rg{border-top:1px solid var(--line);padding-block:4px}
+.rg>summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:10px;padding:10px 2px}
+.rg>summary h2{flex:1}
+.rg>.cards{padding-bottom:14px}
+.rsearch{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 14px;width:100%;max-width:360px}
 
 /* tarjetas */
 .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px}
@@ -165,8 +181,6 @@ section.block{display:flex;flex-direction:column;gap:12px;margin-bottom:28px}
 .mchip .chip{border-top-right-radius:0;border-bottom-right-radius:0}
 .mchip .x{border:1px solid var(--line);border-left:0;background:transparent;color:var(--muted);border-radius:0 999px 999px 0;padding:4px 9px;font-size:13.5px;line-height:1.3}
 .nores{margin:10px 0 0}
-.subp{margin-top:14px;border-top:1px solid var(--line);padding-top:10px}
-.subp summary{cursor:pointer}
 .price{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
 .price input{width:84px;height:34px;border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:5px 8px;text-align:right;font-variant-numeric:tabular-nums}
 .price a{color:var(--accent);white-space:nowrap}
@@ -233,11 +247,23 @@ const ING = {
   parmesano:["Parmesano","esp"], gorgonzola:["Gorgonzola","esp"], qcabra:["Rulo de cabra","esp"], mascarpone:["Mascarpone","esp"], nueces:["Nueces","esp"], coco:["Leche de coco","esp"], currorojo:["Pasta de curry rojo","esp"],
   esparragos:["Espárragos verdes","esp"], padron:["Pimientos de Padrón","esp"], rucula:["Rúcula","esp"], pina:["Piña","esp"], frutosrojos:["Frutos rojos","esp"], romero:["Romero","esp"], guindilla:["Guindilla","esp"],
   brioche:["Pan brioche","esp"], lasana:["Placas de lasaña","esp"], gnocchi:["Gnocchi","esp"], chocolate:["Chocolate negro","esp"], bizcochos:["Bizcochos de soletilla","esp"], cafe:["Café","esp"], cacao:["Cacao en polvo","esp"],
-  bacalao:["Bacalao desalado","prot"], piquillo:["Pimientos del piquillo","veg"], pulpo:["Pulpo cocido","esp"], costillas:["Costillas de cerdo","esp"]
+  bacalao:["Bacalao desalado","prot"], piquillo:["Pimientos del piquillo","veg"], pulpo:["Pulpo cocido","esp"], costillas:["Costillas de cerdo","esp"],
+  tortitas:["Tortitas de arroz","carb"], nachos:["Nachos","carb"], palomitas:["Maíz para palomitas","carb"], cacahuete:["Crema de cacahuete","otros"]
 };
 GROUPS.esp = "Para recetas especiales";
 GROUPS.mine = "Añadidos por ti";
-const CATS = {pollo:"Pollo", carne:"Carne", huevo:"Huevo", legumbre:"Legumbre", pescado:"Pescado", pasta:"Pasta", arroz:"Arroz", verdura:"Verdura", postre:"Postre"};
+const CATS = {pollo:"Pollo", carne:"Carne", huevo:"Huevo", legumbre:"Legumbre", pescado:"Pescado", pasta:"Pasta", arroz:"Arroz", verdura:"Verdura", postre:"Postre", snack:"Snack"};
+// Agrupación del recetario por la base del plato (se deduce de la categoría, el nombre y los ingredientes)
+const TYPES = {pasta:"Pastas", arroz:"Arroces y cereales", legumbre:"Legumbres", verdura:"Verduras y ensaladas", proteina:"Carne, pescado y huevo", pan:"Bocadillos, tacos y pizzas"};
+const PASTA_I=["pasta","fideos","noodles","lasana","gnocchi"], ARROZ_I=["arroz","quinoa","cuscus"], LEG_I=["garbanzos","lentejas","alubias","edamame","soja_text","hummus"];
+function dishType(r){
+  if(r.cat==="pasta"||r.ings.some(k=>PASTA_I.includes(k))) return "pasta";
+  if(/^pan con|bocadillo|s[aá]ndwich|wrap|taco|fajita|quesadilla|tosta|pizza|hamburguesa|pita|montadito|kebab|bikini|burrito(?! bowl)|mollete|empanad|perrito/i.test(r.name)) return "pan";
+  if(r.cat==="arroz"||r.ings.some(k=>ARROZ_I.includes(k))) return "arroz";
+  if(r.cat==="legumbre"||r.ings.some(k=>LEG_I.includes(k))) return "legumbre";
+  if(r.cat==="verdura"||/^(ensalada|crema|pur[eé]|pisto|sopa|gazpacho|salmorejo)/i.test(r.name)) return "verdura";
+  return "proteina";
+}
 // Especiales: [id, nombre, cat, ocasión p=pareja f=finde, minutos, ingredientes, pasos, truco]
 const SP = [
  ["s1","Solomillo a la mostaza y miel con puré","carne","pf",35,["solomillo","mostaza","miel","nata","patatas","mantequilla"],["Cuece las patatas peladas en dados 15 min y haz un puré con mantequilla, sal y un poco de leche.","Sella el solomillo entero por todas las caras (6-8 min) y termínalo 8 min en horno a 200 °C.","En la misma sartén: 1 cucharada de mostaza, 1 de miel y la nata. Reduce 3 min.","Deja reposar la carne 3 min, córtala en medallones y napa con la salsa."],"Sirve el puré con una cuchara formando un óvalo y los medallones encima en abanico."],
@@ -559,7 +585,53 @@ const R = [
  ["r266","Bibimbap rápido","arroz","c",20,["arroz","picada","espinacas","zanahoria","huevos","soja"],["Cuece el arroz.","Dora la carne con soja; saltea espinacas y zanahoria rallada aparte.","Monta el bol con un huevo frito encima y salsa picante si tienes."]],
  ["r267","Poke bowl de atún y mango","arroz","c",15,["arroz","atun","mango","pepino","soja"],["Cuece el arroz y deja templar.","Mango y pepino en dados.","Monta con el atún y aliña con soja."]]
 ];
+// Snacks: [id, nombre, d=dulce s=salado, minutos, ingredientes, pasos]
+const SN = [
+ // Salados
+ ["n1","Tostada con tomate y aceite","s",5,["pan","tomate"],["Tuesta el pan.","Ralla el tomate o úntalo partido por la mitad.","Aceite de oliva y sal."]],
+ ["n2","Tostada de aguacate y tomate cherry","s",5,["pan","aguacate","cherry"],["Tuesta el pan.","Aplasta el aguacate con sal y unas gotas de limón.","Cherry partidos por encima y un poco de pimienta."]],
+ ["n3","Hummus con palitos de zanahoria y pepino","s",5,["hummus","zanahoria","pepino"],["Pela la zanahoria y córtala en bastones junto con el pepino.","Pon el hummus en un cuenco con un hilo de aceite y pimentón.","A mojar."]],
+ ["n4","Garbanzos crujientes al horno","s",25,["garbanzos"],["Escurre y seca muy bien los garbanzos con papel.","Mézclalos con aceite, sal, pimentón y comino.","Horno a 200 °C 20-25 min, moviéndolos a mitad. Crujen más al enfriar."]],
+ ["n5","Edamame con sal y limón","s",5,["edamame","limon"],["Edamame congelado al micro 3-4 min con un poco de agua (o hervido 4 min).","Escurre y añade sal gorda y limón.","Se come apretando la vaina con los dientes."]],
+ ["n6","Tortitas de arroz con queso fresco y tomate","s",3,["tortitas","qfresco","tomate"],["Corta el queso fresco y el tomate en rodajas finas.","Ponlos sobre las tortitas.","Orégano, sal y un hilo de aceite."]],
+ ["n7","Tortitas de arroz con hummus y pepino","s",3,["tortitas","hummus","pepino"],["Unta las tortitas con hummus.","Pepino en rodajas finas encima.","Pimentón por encima."]],
+ ["n8","Huevos cocidos con pimentón","s",12,["huevos"],["Cuece los huevos 10 min desde que hierva el agua.","Enfríalos en agua fría y pélalos.","Pártelos por la mitad con sal y pimentón. Aguantan 3-4 días en la nevera."]],
+ ["n9","Rollitos de pavo y queso crema","s",5,["fiambre","qcrema"],["Extiende las lonchas de pavo.","Unta queso crema y, si tienes, una tira de pepino o pimiento.","Enrolla y corta en trozos."]],
+ ["n10","Nachos gratinados con guacamole","s",10,["nachos","rallado","aguacate","tomate"],["Nachos en una fuente con queso rallado por encima.","Horno o micro hasta que el queso se funda (2-3 min).","Guacamole rápido: aguacate aplastado, tomate picado, sal y limón."]],
+ ["n11","Palomitas caseras","s",5,["palomitas"],["Una cucharada de aceite y el maíz en una olla con tapa.","Fuego medio-alto; agita cuando empiecen a saltar.","Cuando paren, fuera del fuego y sal (o pimentón)."]],
+ ["n12","Tosta de atún y tomate","s",5,["pan","atun","tomate"],["Tuesta el pan y úntalo con tomate.","Atún escurrido por encima.","Un hilo de aceite y orégano."]],
+ ["n13","Brochetas caprese","s",5,["cherry","mozza"],["Alterna en palillos tomate cherry y bolitas o dados de mozzarella.","Aceite, sal y orégano o albahaca.","Si tienes pesto, un poco por encima."]],
+ ["n14","Chips de boniato al micro","s",10,["boniato"],["Boniato en láminas muy finas (mejor con mandolina).","Sobre papel de horno en el plato del micro, con un poco de aceite y sal.","Micro a máxima potencia 3-5 min hasta que estén crujientes; vigila los últimos segundos."]],
+ ["n15","Chips de patata al micro","s",10,["patatas"],["Patata en láminas finísimas, lavadas y bien secas.","Sin amontonar sobre papel de horno con aceite y sal.","Micro 4-6 min a máxima potencia, dándoles la vuelta a mitad."]],
+ ["n16","Quesadilla mini de queso","s",5,["tortillas","queso"],["Queso en media tortilla y dóblala.","Sartén sin aceite a fuego medio, 2 min por lado.","Córtala en triángulos."]],
+ ["n17","Aperitivo de aceitunas y frutos secos","s",2,["aceitunas","frutos_secos"],["Sirve un puñado de cada en cuencos pequeños.","Si quieres, tuesta los frutos secos 2 min en la sartén.","Mejor con medida: un puñado es una ración."]],
+ ["n18","Sándwich de pavo y queso","s",5,["pan_molde","fiambre","queso"],["Monta el sándwich con pavo y queso.","Sartén o sandwichera 2 min por lado.","Si tienes tomate o lechuga, dentro."]],
+ ["n19","Pan con jamón y tomate","s",5,["pan","jamon","tomate"],["Tuesta el pan.","Tomate rallado, aceite y sal.","Jamón por encima."]],
+ ["n20","Mini pizzas de pan de molde","s",8,["pan_molde","frito","mozza"],["Tomate frito sobre las rebanadas.","Mozzarella y orégano (y jamón si tienes).","Horno o airfryer a 200 °C 5-6 min, o tapadas en la sartén."]],
+ ["n21","Bastones de calabacín crujientes","s",20,["calabacin","pan_rallado","rallado"],["Calabacín en bastones, con sal.","Rebózalos en pan rallado mezclado con queso rallado (pasa antes por huevo si tienes).","Horno a 210 °C 15 min o airfryer 10 min."]],
+ // Dulces
+ ["n22","Yogur griego con miel y frutos secos","d",2,["griego","miel","frutos_secos"],["Yogur en un cuenco.","Un hilo de miel.","Frutos secos troceados por encima."]],
+ ["n23","Bol de yogur con fresas y avena","d",3,["yogur","fresas","avena"],["Yogur en un cuenco.","Fresas en trozos.","Copos de avena por encima (tostados en la sartén 2 min si quieres que crujan)."]],
+ ["n24","Overnight oats de plátano","d",5,["avena","leche","yogur","platano"],["Mezcla en un tarro 4 cucharadas de avena, medio vaso de leche y 2 cucharadas de yogur.","Tapa y a la nevera toda la noche.","Por la mañana, plátano en rodajas y canela."]],
+ ["n25","Tortitas de avena y plátano","d",10,["avena","platano","huevos"],["Aplasta un plátano maduro con un huevo y 4 cucharadas de avena.","Sartén antiadherente con una gota de aceite, fuego medio.","Pequeñas tortitas, 1-2 min por lado. Con miel o fruta."]],
+ ["n26","Manzana con crema de cacahuete","d",2,["manzana","cacahuete"],["Manzana en gajos.","Una cucharada de crema de cacahuete para mojar.","Canela por encima si te gusta."]],
+ ["n27","Plátano con chocolate negro","d",3,["platano","chocolate"],["Funde 2 onzas de chocolate 30 s en el micro.","Plátano en rodajas.","Moja o rocía el chocolate por encima. En el congelador 10 min queda tipo helado."]],
+ ["n28","Batido de plátano y avena","d",3,["platano","leche","avena"],["Plátano, un vaso de leche y 2 cucharadas de avena en la batidora.","Bate 30 s.","Canela o cacao si quieres."]],
+ ["n29","Smoothie de mango y yogur","d",3,["mango","yogur"],["Mango en trozos (congelado queda más fresco).","Bate con el yogur y un chorrito de agua o leche.","Unas gotas de lima si tienes."]],
+ ["n30","Batido de fresa","d",3,["fresas","leche"],["Fresas sin el rabito.","Bate con un vaso de leche bien fría.","Si está ácido, un poco de miel."]],
+ ["n31","Tostada de crema de cacahuete y plátano","d",3,["pan","cacahuete","platano"],["Tuesta el pan.","Unta crema de cacahuete.","Plátano en rodajas y una pizca de canela."]],
+ ["n32","Galletas de avena y plátano","d",20,["avena","platano","frutos_secos"],["Aplasta 2 plátanos maduros y mezcla con 150 g de avena y frutos secos picados.","Forma galletas sobre papel de horno.","Horno a 180 °C 15 min. Aguantan una semana en un bote."]],
+ ["n33","Manzana asada al micro","d",5,["manzana","miel"],["Quita el corazón a la manzana y hazle un corte alrededor.","Miel y canela en el hueco.","Micro 3-4 min tapada. Con yogur, mejor."]],
+ ["n34","Fresas con yogur y chocolate","d",5,["fresas","griego","chocolate"],["Fresas en un cuenco.","Yogur griego por encima.","Chocolate rallado o fundido."]],
+ ["n35","Tortitas de arroz con chocolate","d",5,["tortitas","chocolate"],["Funde unas onzas de chocolate 30 s en el micro.","Úntalo sobre las tortitas.","Deja que endurezca 5 min en la nevera."]],
+ ["n36","Naranja con canela y miel","d",3,["naranja","miel"],["Pela la naranja y córtala en rodajas.","Un hilo de miel.","Canela por encima."]],
+ ["n37","Bolitas energéticas de avena y cacao","d",15,["avena","cacahuete","miel","cacao"],["Mezcla 100 g de avena, 2 cucharadas de crema de cacahuete, 2 de miel y 1 de cacao.","Forma bolitas con las manos.","Nevera 10 min. Aguantan una semana."]],
+ ["n38","Mug cake de chocolate","d",5,["harina","huevos","azucar","cacao","leche"],["En una taza: 1 huevo, 3 cucharadas de leche, 2 de azúcar, 2 de harina y 1 de cacao.","Bate bien con un tenedor.","Micro 60-90 s. Que quede algo húmedo en el centro."]],
+ ["n39","Yogur helado de frutos rojos","d",5,["griego","frutosrojos","miel"],["Bate yogur griego con frutos rojos congelados y miel.","Cómelo al momento como helado suave.","O congélalo 1 h en un táper para que quede más firme."]],
+ ["n40","Manzana con queso fresco y miel","d",3,["qfresco","manzana","miel"],["Queso fresco en dados.","Manzana en gajos.","Un hilo de miel por encima: dulce y salado a la vez."]]
+];
 const REC = Object.fromEntries(R.map(r=>[r[0],{id:r[0],name:r[1],cat:r[2],meal:r[3],min:r[4],ings:r[5],steps:r[6]}]));
+SN.forEach(r=>REC[r[0]]={id:r[0],name:r[1],cat:"snack",meal:"s",sweet:r[2]==="d",min:r[3],ings:r[4],steps:r[5]});
 SP.forEach(r=>REC[r[0]]={id:r[0],name:r[1],cat:r[2],meal:"cn",occ:r[3],min:r[4],ings:r[5],steps:r[6],tip:r[7],special:true});
 let QUICK = [];
 // Recetas propias: viven en S.myRecipes y se mezclan con el recetario fijo en REC
@@ -567,7 +639,7 @@ function syncMine(){
   for(const id of Object.keys(REC)) if(REC[id].mine) delete REC[id];
   S.myRecipes=S.myRecipes||[];
   for(const r of S.myRecipes) REC[r.id]=Object.assign({steps:[]},r,{mine:true});
-  QUICK=Object.values(REC).filter(r=>!r.special);
+  QUICK=Object.values(REC).filter(r=>!r.special&&r.meal!=="s");
   S.plan.slots.forEach(s=>{ if(s.rid&&!REC[s.rid]){ s.rid=null; s.lock=false; } });
 }
 const DAYS = ["Lunes","Martes","Miércoles","Jueves","Viernes","Sábado","Domingo"];
@@ -672,11 +744,12 @@ function card(r,info,actions){
   const ds=daysSince(r.id);
   const tags=[];
   if(r.cat==="pasta"&&pastaThisWeek()>=S.settings.pastaMax) tags.push(`<span class="tag">Ya llevas tu pasta</span>`);
-  if(ds===Infinity&&r.cat!=="pasta") tags.push(`<span class="tag new">Nuevo para ti</span>`);
+  if(r.meal==="s"){}
+  else if(ds===Infinity&&r.cat!=="pasta") tags.push(`<span class="tag new">Nuevo para ti</span>`);
   else if(ds<7) tags.push(`<span class="tag">Hace ${ds} día${ds===1?"":"s"}</span>`);
-  return `<article class="card">
+  return `<article class="card" data-name="${esc(norm(r.name))}">
     <div class="row between"><h3>${esc(r.name)}</h3></div>
-    <div class="meta">${catDot(r.cat)}<span>${r.min} min</span><span>${r.special?occLabel(r.occ):r.meal==="c"?"Comida":r.meal==="n"?"Cena":"Comida o cena"}</span>${r.mine?`<span class="tag new">Tuya</span>`:""}${tags.join("")}</div>
+    <div class="meta">${catDot(r.cat)}<span>${r.min} min</span><span>${r.special?occLabel(r.occ):r.meal==="s"?(r.sweet||r.cat==="postre"?"Dulce":"Salado"):r.meal==="c"?"Comida":r.meal==="n"?"Cena":"Comida o cena"}</span>${r.mine?`<span class="tag new">Tuya</span>`:""}${tags.join("")}</div>
     <div class="meter" title="Tienes ${pct}% de los ingredientes"><span style="width:${pct}%"></span></div>
     <div class="ings">${r.ings.map(k=>`<span class="ing ${has(k)?"have":"miss"}">${esc(ingName(k))}</span>`).join("")}</div>
     ${r.steps.length||r.tip?`<details><summary>Cómo se hace</summary>${r.steps.length?`<ol>${r.steps.map(s=>`<li>${esc(s)}</li>`).join("")}</ol>`:""}${r.tip?`<p class="tip"><b>Para quedar bien:</b> ${esc(r.tip)}</p>`:""}</details>`:""}
@@ -685,33 +758,42 @@ function card(r,info,actions){
 }
 
 /* ---------- Pestaña HOY ---------- */
-let showAll=false, hoyMode="near", aiCtl=null, sampleFn=null;
+let showAll=false, hoyMode="near", hoyType="todas", aiCtl=null, sampleFn=null;
+const TYPES_SHORT={pasta:"Pastas", arroz:"Arroces", legumbre:"Legumbres", verdura:"Verduras", proteina:"Solo proteína", pan:"Bocadillos y tacos"};
 const aiAll={hoy:{loading:false,items:null,err:null,ask:""}, esp:{loading:false,items:null,err:null,ask:""}};
 let aiState=aiAll.hoy;
 let espFilter="todas";
-function chipGroup(byG,g,label){return `<div class="stack" style="gap:6px"><span class="label">${label}</span><div class="chips">${byG[g].map(([k,n])=>`<button class="chip" data-ing="${k}" aria-pressed="${has(k)}">${esc(n)}</button>`).join("")}</div></div>`}
+// Grupos de la despensa plegables. Todos empiezan abiertos salvo «Para recetas especiales»; se recuerda lo que cambias
+let pgToggled=new Set();
+try{ pgToggled=new Set(JSON.parse(localStorage.getItem("qch-pg")||"[]")); }catch(_){}
+const pgOpen=g=>(g==="esp")===pgToggled.has(g);
+const chipBtn=(k,n)=>`<button class="chip" data-ing="${k}" aria-pressed="${has(k)}">${esc(n)}</button>`;
+function chipGroup(byG,g,label){
+  const list=byG[g]||[], n=list.filter(([k])=>has(k)).length;
+  const body=g==="mine"?list.map(([k,nm])=>`<span class="mchip">${chipBtn(k,nm)}<button class="x" data-rmcustom="${k}" aria-label="Quitar ${esc(nm)} de la lista">×</button></span>`).join(""):list.map(([k,nm])=>chipBtn(k,nm)).join("");
+  return `<details class="pg" data-pg="${g}" ${pgOpen(g)?"open":""}><summary><span class="label">${label}</span><span class="small muted">${n}/${list.length}</span><span class="chev" aria-hidden="true"></span></summary><div class="chips">${body}</div></details>`;
+}
 function pantryHTML(open){
   const byG={}; for(const [k,[n,g]] of Object.entries(ING)) (byG[g]=byG[g]||[]).push([k,n]);
-  const espN=byG.esp.filter(([k])=>has(k)).length;
-  const mine=(S.custom||[]);
+  const order=[...(byG.mine?.length?["mine"]:[]),...Object.keys(GROUPS).filter(g=>g!=="mine"&&g!=="esp"),"esp"];
   return `<details class="pantry" id="pantry" ${open?"open":""}>
-    <summary><div><h2>Tu despensa y nevera</h2><div class="small muted">${S.pantry.length} ingredientes marcados · siempre asumo aceite, sal, pimienta y especias</div></div><span class="btn sm">Editar</span></summary>
+    <summary><div><h2>Tu despensa y nevera</h2><div class="small muted">${S.pantry.length} ingredientes marcados · siempre asumo aceite, sal, pimienta y especias</div></div><span class="btn sm">Editar <span class="chev" aria-hidden="true"></span></span></summary>
     ${S.example?`<p class="note">Es una despensa de ejemplo. Marca lo que tienes de verdad y se guarda solo.</p>`:""}
     <div class="padd">
       <input type="search" id="pSearch" value="${esc(pq)}" placeholder="Buscar ingrediente…" aria-label="Buscar ingrediente" autocomplete="off">
       <form id="addIng" class="row" style="gap:6px"><input type="text" id="newIng" placeholder="¿No está? Escríbelo: p. ej. sobrasada" aria-label="Añadir ingrediente" autocomplete="off"><button class="btn sm primary" type="submit">Añadir</button></form>
     </div>
-    ${mine.length?`<div class="stack mine" style="gap:6px;margin-top:14px"><span class="label">Añadidos por ti</span><div class="chips">${mine.map(c=>`<span class="mchip"><button class="chip" data-ing="${c.k}" aria-pressed="${has(c.k)}">${esc(c.n)}</button><button class="x" data-rmcustom="${c.k}" aria-label="Quitar ${esc(c.n)} de la lista">×</button></span>`).join("")}</div></div>`:""}
     <p class="small muted nores" id="noRes" hidden>No está en la lista. Escríbelo en «Añadir» y lo tendré en cuenta en tus recetas y en las ideas de Claude.</p>
-    <div class="pgroups">${Object.entries(GROUPS).filter(([g])=>g!=="esp"&&g!=="mine").map(([g,label])=>chipGroup(byG,g,label)).join("")}</div>
-    <details class="subp" id="pantryEsp" ${document.getElementById("pantryEsp")?.open?"open":""}><summary class="small"><b>Ingredientes para recetas especiales</b> <span class="muted">(${espN} marcados)</span></summary><div style="margin-top:10px">${chipGroup(byG,"esp","Carnes, quesos, repostería y otros")}</div></details>
+    <div class="pgroups">${order.map(g=>chipGroup(byG,g,GROUPS[g])).join("")}</div>
     <div class="row" style="margin-top:12px"><button class="btn sm ghost" data-act="clear-pantry">Vaciar todo</button></div>
   </details>`;
 }
 function renderHoy(){
   const pantryOpen=document.getElementById("pantry")?.open ?? S.example;
   const want = mealNow==="comida"?"c":"n";
-  const all = QUICK.filter(r=>r.meal.includes(want)).map(r=>({r,info:score(r)}));
+  const all = QUICK.filter(r=>r.meal.includes(want)&&(hoyType==="todas"||dishType(r)===hoyType)).map(r=>({r,info:score(r)}));
+  const tb=(k,l)=>`<button data-htype="${k}" aria-pressed="${hoyType===k}">${l}</button>`;
+  const typeBar=`<div class="seg" role="group" aria-label="Tipo de plato" style="align-self:flex-start">${tb("todas","Todo")}${Object.entries(TYPES).map(([k,l])=>tb(k,TYPES_SHORT[k])).join("")}</div>`;
   // mine: solo platos completos · near: primero los que menos te faltan · all: todas por orden alfabético
   const list = hoyMode==="mine" ? all.filter(x=>!x.info.miss.length).sort((a,b)=>b.info.s-a.info.s)
     : hoyMode==="all" ? all.sort((a,b)=>a.r.name.localeCompare(b.r.name,"es"))
@@ -732,8 +814,9 @@ function renderHoy(){
           <div class="seg" role="group" aria-label="Comida o cena"><button data-meal="comida" aria-pressed="${mealNow==="comida"}">Comida</button><button data-meal="cena" aria-pressed="${mealNow==="cena"}">Cena</button></div>
         </div>
       </div>
+      ${typeBar}
       ${orphanNote}
-      ${list.length?`<div class="cards">${top.map(x=>card(x.r,x.info,act(x.r))).join("")}</div>`:`<p class="note" style="margin:0">Con lo que tienes marcado no sale ningún plato completo. Marca más ingredientes o elige «Lo que tengo primero» para ver los que casi tienes.</p>`}
+      ${list.length?`<div class="cards">${top.map(x=>card(x.r,x.info,act(x.r))).join("")}</div>`:`<p class="note" style="margin:0">Con lo que tienes marcado no sale ningún plato completo${hoyType==="todas"?"":" de este tipo"}. Marca más ingredientes${hoyType==="todas"?"":", elige «Todo»"} o elige «Lo que tengo primero» para ver los que casi tienes.</p>`}
       ${list.length>6?`<div><button class="btn sm ghost" data-act="more">${showAll?"Ver menos":"Ver las "+list.length+" opciones"}</button></div>`:""}
     </section>
     ${fresh.length?`<section class="block"><h2>Para salir de la rutina</h2><p class="small muted" style="margin:0">Platos que no has hecho nunca y para los que te faltan como mucho 2 cosas.</p><div class="cards">${fresh.map(x=>card(x.r,x.info,act(x.r))).join("")}</div></section>`:""}
@@ -758,7 +841,7 @@ function aiCard(it,i,kind){
     <div class="ings">${(it.ingredientes||[]).map(x=>`<span class="ing have">${esc(x)}</span>`).join("")}${(it.faltan||[]).map(x=>`<span class="ing miss">${esc(x)}</span>`).join("")}</div>
     ${it.porque?`<p class="small muted" style="margin:0">${esc(it.porque)}</p>`:""}
     <details><summary>Cómo se hace</summary><ol>${(it.pasos||[]).map(s=>`<li>${esc(s)}</li>`).join("")}</ol>${it.truco?`<p class="tip"><b>Para quedar bien:</b> ${esc(it.truco)}</p>`:""}</details>
-    <div class="foot"><span class="small muted">${(it.faltan||[]).length?"Te falta: "+esc(it.faltan.join(", ")):"Lo tienes todo"}</span><button class="btn sm primary" data-aicook="${kind}:${i}">Lo cocino</button></div>
+    <div class="foot"><span class="small muted">${(it.faltan||[]).length?"Te falta: "+esc(it.faltan.join(", ")):"Lo tienes todo"}</span><div class="row" style="gap:6px"><button class="btn sm" data-aisave="${kind}:${i}" ${it.saved?"disabled":""}>${it.saved?"Guardada ✓":"Guardar en mis recetas"}</button><button class="btn sm primary" data-aicook="${kind}:${i}">Lo cocino</button></div></div>
   </article>`;
 }
 function promptFor(kind,ask){
@@ -809,13 +892,50 @@ function slotOptions(){
   const ws=planWeekStart();
   return S.plan.slots.map((s,i)=>`<option value="${i}" ${s.day>=5&&s.meal==="cena"&&i===11?"selected":""}>${DAYS[s.day]} ${addDays(ws,s.day).getDate()} · ${s.meal}${s.rid?" (sustituye)":""}</option>`).join("");
 }
-let espView="especiales", formOpen=false, editId=null;
+let espView="diario", formOpen=false, editId=null;
+let rgOpen=new Set();
+try{ rgOpen=new Set(JSON.parse(localStorage.getItem("qch-rg")||"[]")); }catch(_){}
+// Un grupo plegable de tarjetas (cerrado por defecto); ordena por lo que menos te falta
+function recGroup(key,title,recs,act){
+  const items=recs.map(r=>({r,info:score(r)})).sort((a,b)=>a.info.miss.length-b.info.miss.length||a.r.name.localeCompare(b.r.name,"es"));
+  const full=items.filter(x=>!x.info.miss.length).length;
+  return `<details class="rg" data-rg="${key}" ${rgOpen.has(key)?"open":""}><summary><h2>${title}</h2><span class="small muted">${items.length} recetas${full?` · ${full} con todo`:""}</span><span class="chev" aria-hidden="true"></span></summary>
+    <div class="cards">${items.map(x=>card(x.r,x.info,act(x.r))).join("")}</div></details>`;
+}
+const recSearch=ph=>`<input type="search" id="rSearch" class="rsearch" value="${esc(rq)}" placeholder="${ph}" aria-label="Buscar receta" autocomplete="off"><p class="small muted" id="recNoRes" style="margin:0" hidden>No hay ninguna receta con ese nombre.</p>`;
+function renderDiario(views){
+  const opts=slotOptions();
+  const groups=Object.entries(TYPES).map(([k,l])=>[k,l,QUICK.filter(r=>dishType(r)===k)]).filter(g=>g[2].length);
+  document.getElementById("view").innerHTML=`
+    <section class="block">
+      ${views}
+      <div><h2>Recetario de diario</h2><p class="small muted" style="margin:2px 0 0">${QUICK.length} platos de 20 minutos o menos, agrupados por la base del plato. Toca un grupo para abrirlo.</p></div>
+      ${recSearch("Buscar receta: lentejas, carbonara…")}
+      <div>${groups.map(([k,l,list])=>recGroup(k,l,list,r=>planActs(r,opts))).join("")}</div>
+    </section>`;
+  applyRecSearch();
+}
+function renderSnacks(views){
+  const act=r=>`<button class="btn sm" data-tobuy="${r.id}">Falta → compra</button>`;
+  const all=Object.values(REC).filter(r=>r.meal==="s");
+  const sweet=r=>r.sweet||r.cat==="postre";
+  document.getElementById("view").innerHTML=`
+    <section class="block">
+      ${views}
+      <div><h2>Snacks</h2><p class="small muted" style="margin:2px 0 0">Para media mañana, la merienda o antes de entrenar. No entran en el plan semanal ni en Hoy.</p></div>
+      ${recSearch("Buscar snack: yogur, tostada…")}
+      <div>${recGroup("sn-s","Salados",all.filter(r=>!sweet(r)),act)}${recGroup("sn-d","Dulces",all.filter(sweet),act)}</div>
+    </section>`;
+  applyRecSearch();
+}
 const planActs=(r,opts)=>`<div class="row" style="gap:6px"><select class="btn sm" id="slotSel-${r.id}" aria-label="Día del plan">${opts}</select><button class="btn sm" data-toplan="${r.id}">Al plan</button><button class="btn sm" data-tobuy="${r.id}">Falta → compra</button><button class="btn sm primary" data-cook="${r.id}">Lo cocino</button></div>`;
 function renderEspecial(){
   ensureWeek();
   const v=(k,l)=>`<button data-espv="${k}" aria-pressed="${espView===k}">${l}</button>`;
-  const views=`<div class="seg" role="group" aria-label="Qué recetas ver" style="align-self:flex-start">${v("especiales","Especiales")}${v("mias","Mis recetas")}</div>`;
+  const views=`<div class="seg" role="group" aria-label="Qué recetas ver" style="align-self:flex-start">${v("diario","De diario")}${v("especiales","Especiales")}${v("snacks","Snacks")}${v("mias","Mis recetas")}</div>`;
   if(espView==="mias") return renderMias(views);
+  if(espView==="diario") return renderDiario(views);
+  if(espView==="snacks") return renderSnacks(views);
   const list=Object.values(REC).filter(r=>r.special).filter(r=>espFilter==="todas"||(espFilter==="postre"?r.cat==="postre":r.occ.includes(espFilter)&&r.cat!=="postre")).map(r=>({r,info:score(r)})).sort((a,b)=>a.info.miss.length-b.info.miss.length);
   const opts=slotOptions();
   const act=r=>planActs(r,opts);
@@ -839,7 +959,7 @@ function renderMias(views){
     <section class="block">
       ${views}
       <div class="row between">
-        <div><h2>Mis recetas</h2><p class="small muted" style="margin:2px 0 0">Las de diario salen en <b>Hoy</b> y en el plan semanal; las especiales, junto a las recetas especiales.</p></div>
+        <div><h2>Mis recetas</h2><p class="small muted" style="margin:2px 0 0">Las de diario salen en <b>Hoy</b> y en el plan semanal; las especiales, junto a las recetas especiales, y los snacks, en Snacks.</p></div>
         ${formOpen?"":`<button class="btn primary" data-act="rform-new">+ Nueva receta</button>`}
       </div>
       ${formOpen?recipeForm():""}
@@ -854,13 +974,24 @@ function recipeForm(){
     <h2 class="full">${r?"Editar receta":"Nueva receta"}</h2>
     <label class="full">Nombre<input type="text" id="rfName" maxlength="80" value="${esc(r?.name)}" placeholder="p. ej. Pollo al pimentón de mi madre" autocomplete="off"></label>
     <label>Tipo de plato<select id="rfCat">${Object.entries(CATS).map(([k,l])=>o(k,l,r?.cat||"pollo")).join("")}</select></label>
-    <label>Cuándo<select id="rfKind">${[["cn","Comida o cena"],["c","Solo comida"],["n","Solo cena"],["sp","Especial (pareja o finde)"]].map(([k,l])=>o(k,l,kind)).join("")}</select></label>
+    <label>Cuándo<select id="rfKind">${[["cn","Comida o cena"],["c","Solo comida"],["n","Solo cena"],["sp","Especial (pareja o finde)"],["s","Snack"]].map(([k,l])=>o(k,l,kind)).join("")}</select></label>
     <label>Minutos<input type="number" id="rfMin" min="1" max="600" inputmode="numeric" value="${r?.min||20}"></label>
     <label class="full"><span>Ingredientes <i>(separados por comas)</i></span><textarea id="rfIngs" rows="2" placeholder="pollo, cebolla, nata, curry">${esc(r?r.ings.map(ingName).join(", "):"")}</textarea><span class="small">No hace falta poner aceite, sal, pimienta ni especias. Si alguno no está en la despensa, se añade a «Añadidos por ti».</span></label>
     <label class="full"><span>Pasos <i>(opcional, uno por línea)</i></span><textarea id="rfSteps" rows="4">${esc(r?r.steps.join("\n"):"")}</textarea></label>
     <label class="full"><span>Truco <i>(opcional)</i></span><input type="text" id="rfTip" maxlength="200" value="${esc(r?.tip)}" autocomplete="off"></label>
     <div class="row full"><button class="btn primary" type="submit">Guardar receta</button><button class="btn ghost" type="button" data-act="rform-cancel">Cancelar</button></div>
   </form>`;
+}
+// Convierte una idea de Claude en receta propia: así el recetario crece con lo que te gusta
+function saveAIRecipe(ref){
+  const [kind,ix]=ref.split(":"), it=aiAll[kind].items[+ix]; if(!it||it.saved) return;
+  const raw=[...(it.ingredientes||[]),...(it.faltan||[])].map(x=>String(x).trim()).filter(Boolean);
+  const r={id:"m"+Date.now().toString(36), name:String(it.nombre).slice(0,80), cat:CATS[it.categoria]?it.categoria:"verdura",
+    meal:"cn", min:Math.min(600,Math.max(1,Math.round(+it.minutos||20))),
+    ings:[...new Set(raw.map(x=>matchIng(x)||newCustom(x)))], steps:(it.pasos||[]).map(String)};
+  if(kind==="esp"){ r.special=true; r.occ="pf"; }
+  if(it.truco) r.tip=String(it.truco);
+  S.myRecipes.push(r); it.saved=true; syncMine(); persist(); toast(`${r.name} guardada en Mis recetas`); render();
 }
 function saveRecipe(){
   const g=id=>document.getElementById(id).value;
@@ -1027,7 +1158,9 @@ document.addEventListener("click",e=>{
   if(d.meal){ mealNow=d.meal; aiAll.hoy.items=null; render(); return; }
   if(d.rmcustom){ removeCustom(d.rmcustom); render(); return; }
   if(d.espf){ espFilter=d.espf; render(); return; }
-  if(d.espv){ espView=d.espv; render(); return; }  if(d.redit){ editId=d.redit; formOpen=true; render(); document.getElementById("recipeForm")?.scrollIntoView({behavior:"smooth",block:"start"}); return; }
+  if(d.htype){ hoyType=d.htype; showAll=false; render(); return; }
+  if(d.aisave!=null){ saveAIRecipe(d.aisave); return; }
+  if(d.espv){ espView=d.espv; rq=""; render(); return; }  if(d.redit){ editId=d.redit; formOpen=true; render(); document.getElementById("recipeForm")?.scrollIntoView({behavior:"smooth",block:"start"}); return; }
   if(d.rdel){ const r=REC[d.rdel]; if(!confirm(`¿Borrar «${r.name}» de tus recetas?`)) return; S.myRecipes=S.myRecipes.filter(x=>x.id!==d.rdel); if(editId===d.rdel){editId=null;formOpen=false} syncMine(); persist(); toast("Receta borrada"); render(); return; }
   if(d.ai){ askAI(d.ai); return; }
   if(d.toplan){ const i=+document.getElementById("slotSel-"+d.toplan).value, s=S.plan.slots[i]; Object.assign(s,{on:true,rid:d.toplan,lock:true,done:false}); persist(); toast(`${REC[d.toplan].name}: ${DAYS[s.day].toLowerCase()} ${s.meal}`); render(); return; }
@@ -1061,15 +1194,33 @@ document.addEventListener("change",e=>{
   if(t.id==="hRec"){ const o=t.value==="__otro"; document.getElementById("hName").hidden=!o; document.getElementById("hCat").hidden=!o; }
 });
 let pq="";
-document.addEventListener("input",e=>{ if(e.target.id!=="pSearch") return; pq=e.target.value; applySearch(); if(pq) document.getElementById("newIng").value=pq; });
+document.addEventListener("input",e=>{ if(e.target.id==="rSearch"){ rq=e.target.value; applyRecSearch(); return; } if(e.target.id!=="pSearch") return; pq=e.target.value; applySearch(); if(pq) document.getElementById("newIng").value=pq; });
 function applySearch(){
   if(!document.getElementById("pSearch")) return;
   const q=norm(pq); let any=false;
   document.querySelectorAll("#pantry .chip").forEach(c=>{const ok=!q||norm(c.textContent.replace("✓","")).includes(q); (c.closest(".mchip")||c).hidden=!ok; if(ok&&q)any=true;});
-  document.querySelectorAll("#pantry .stack").forEach(g=>{g.hidden=!!q&&![...g.querySelectorAll(".chip")].some(c=>!(c.closest(".mchip")||c).hidden)});
-  const sub=document.getElementById("pantryEsp"); if(q&&sub&&[...sub.querySelectorAll(".chip")].some(c=>!c.hidden)) sub.open=true;
+  // Al buscar se abren los grupos con resultados y se ocultan los demás; al borrar la búsqueda vuelven como los dejaste
+  document.querySelectorAll("#pantry .pg").forEach(g=>{
+    const hit=[...g.querySelectorAll(".chip")].some(c=>!(c.closest(".mchip")||c).hidden);
+    g.hidden=!!q&&!hit; g.open=q?hit:pgOpen(g.dataset.pg);
+  });
   document.getElementById("noRes").hidden=!q||any;
 }
+// Recetario: filtra tarjetas por nombre sin volver a pintar (así no se pierde el foco del buscador)
+let rq="";
+function applyRecSearch(){
+  const q=norm(rq);
+  document.querySelectorAll(".rg").forEach(g=>{
+    let n=0; g.querySelectorAll(".card").forEach(c=>{const ok=!q||c.dataset.name.includes(q); c.hidden=!ok; if(ok)n++;});
+    g.hidden=!!q&&!n; g.open=q?n>0:rgOpen.has(g.dataset.rg);
+  });
+  const nr=document.getElementById("recNoRes"); if(nr) nr.hidden=!q||!!document.querySelector(".rg:not([hidden])");
+}
+document.addEventListener("toggle",e=>{
+  const d=e.target.dataset; if(!d) return;
+  if(d.pg&&!pq){ const g=d.pg; if(e.target.open!==pgOpen(g)){ pgToggled.has(g)?pgToggled.delete(g):pgToggled.add(g); try{localStorage.setItem("qch-pg",JSON.stringify([...pgToggled]))}catch(_){} } }
+  if(d.rg&&!rq){ e.target.open?rgOpen.add(d.rg):rgOpen.delete(d.rg); try{localStorage.setItem("qch-rg",JSON.stringify([...rgOpen]))}catch(_){} }
+},true);
 document.addEventListener("submit",e=>{
   if(e.target.id==="addIng"){ e.preventDefault(); pq=""; const v=document.getElementById("newIng").value; addCustom(v); render(); document.getElementById("pantry").open=true; return; }
   if(e.target.id==="recipeForm"){ e.preventDefault(); saveRecipe(); return; }
