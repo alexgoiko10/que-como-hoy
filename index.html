@@ -190,6 +190,12 @@ input[type=search],input[type=text],input[type=number],input:not([type]){border:
 .ings{display:flex;flex-wrap:wrap;gap:4px}
 .ing{font-size:13px;padding:2px 9px;border-radius:999px;background:var(--sunk);color:var(--ink)}
 .ing.miss{background:transparent;border:1.5px dashed color-mix(in srgb,var(--warn) 55%,transparent);color:var(--warn);font-weight:500}
+.ing .q{font-weight:700;font-variant-numeric:tabular-nums}
+.serv{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13px;margin:0 0 8px}
+.serv .stp{display:flex;gap:6px;flex:none}
+.serv .ico{width:34px;height:30px;padding:0;font-size:17px;line-height:1;color:var(--ink)}
+.serv .ico:disabled{opacity:.35}
+.sq{font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
 
 /* ---------- Recetas en tarjetas ---------- */
 .rg{background:var(--surface);border-radius:22px}
@@ -722,6 +728,127 @@ const SN = [
 const REC = Object.fromEntries(R.map(r=>[r[0],{id:r[0],name:r[1],cat:r[2],meal:r[3],min:r[4],ings:r[5],steps:r[6]}]));
 SN.forEach(r=>REC[r[0]]={id:r[0],name:r[1],cat:"snack",meal:"s",sweet:r[2]==="d",min:r[3],ings:r[4],steps:r[5]});
 SP.forEach(r=>REC[r[0]]={id:r[0],name:r[1],cat:r[2],meal:"cn",occ:r[3],min:r[4],ings:r[5],steps:r[6],tip:r[7],special:true});
+
+/* ---------- Cantidades ----------
+   Por ingrediente: [unidad, cantidad si es la base del plato, si acompaña, papel].
+   Papel P1–P4: proteína; la de número más bajo es la base y se ajusta a tu ración de carne (135 g = 70 kg en descanso).
+   C1–C3: hidrato; el de número más bajo es la base y se ajusta a tu ración de pasta o arroz en crudo (75 g). El pan solo es base en bocadillos, tostas y tacos,
+   y en cremas y ensaladas el hidrato acompaña; los dos, salvo que sean el primer ingrediente.
+   V: verdura que pesa más si es el primer ingrediente del plato. Sin papel: siempre la misma cantidad. */
+const P0=135, C0=75;
+const QU = {
+  pollo:["g",135,100,"P1"], pavo:["g",135,100,"P1"], picada:["g",135,100,"P1"], ternera:["g",135,100,"P1"], lomo:["g",135,100,"P1"], secreto:["g",150,100,"P1"],
+  salmon:["g",150,100,"P1"], merluza:["g",160,100,"P1"], bacalao:["g",160,100,"P1"], gambas:["g",160,100,"P1"], calamares:["g",175,100,"P1"], surimi:["g",100,60,"P1"],
+  atun:["lata",2,1,"P1"], caballa:["lata",1,1,"P1"], sardinas:["lata",1,1,"P1"], mejillones:["lata",1,1,"P1"],
+  salchichas:["ud",4,2,"P1"], hamburguesas:["ud",1,1,"P1"], muslos:["ud",2,1,"P1"], solomillo:["g",175,100,"P1"], entrecot:["g",225,100,"P1"], carrilleras:["g",250,150,"P1"], costillas:["g",400,200,"P1"], pulpo:["g",200,100,"P1"], magret:["ud",.5,.5,"P1"],
+  huevos:["ud",3,1,"P2"], tofu:["g",175,100,"P3"], garbanzos:["g",250,120,"P3"], lentejas:["g",250,120,"P3"], alubias:["g",250,120,"P3"],
+  hummus:["g",100,50,"P3"], edamame:["g",150,80,"P3"], soja_text:["g",50,30,"P3"],
+  jamon:["g",60,40,"P4"], bacon:["g",60,40,"P4"], chorizo:["g",60,40,"P4"], fiambre:["loncha",5,3,"P4"],
+  pasta:["g",75,60,"C1"], arroz:["g",75,60,"C1"], cuscus:["g",75,60,"C1"], quinoa:["g",75,60,"C1"], noodles:["g",75,60,"C1"], fideos:["g",75,60,"C1"], gnocchi:["g",175,100,"C1"], lasana:["placa",4,3,"C1"],
+  patatas:["g",300,150,"C2"], boniato:["g",300,150,"C2"], patatas_fritas:["g",200,120,"C2"],
+  pan:["g",110,40,"C3"], pan_molde:["rebanada",4,2,"C3"], tortillas:["ud",3,2,"C3"], masa_pizza:["ud",.5,.5,"C3"], brioche:["ud",1,1,"C3"],
+  cebolla:["ud",1,.5,"V"], pimiento:["ud",1,.5,"V"], tomate:["ud",2,1,"V"], calabacin:["ud",1,.5,"V"], berenjena:["ud",1,.5,"V"], champis:["g",200,100,"V"],
+  espinacas:["g",150,80,"V"], brocoli:["g",250,150,"V"], zanahoria:["ud",2,1,"V"], lechuga:["ud",.5,.25,"V"], pepino:["ud",1,.5,"V"], judias:["g",200,150,"V"],
+  puerro:["ud",1,.5,"V"], calabaza:["g",350,150,"V"], coliflor:["g",300,200,"V"], cherry:["g",150,100,"V"], alcachofas:["g",200,150,"V"], verd_cong:["g",200,150,"V"],
+  esparragos:["g",125], padron:["g",100], piquillo:["ud",3,2,"V"],
+  aguacate:["ud",.5], maiz:["g",50], guisantes:["g",80], limon:["ud",.5], cebolleta:["ud",.5], ajo:["diente",1], perejil:["cda",1], cilantro:["cda",1], jengibre:["g",10],
+  platano:["ud",1], manzana:["ud",1], naranja:["ud",1], fresas:["g",150], mango:["ud",.5], lima:["ud",.5], pina:["g",150], frutosrojos:["g",100], rucula:["g",30], romero:["ramita",1], guindilla:["ud",1],
+  queso:["loncha",2], rallado:["g",30,20,"V"], mozza:["g",80], qfresco:["g",80], nata:["ml",100], leche:["ml",100], mantequilla:["g",15], yogur:["ud",1], griego:["ud",1],
+  qcrema:["g",50], burrata:["ud",.5], feta:["g",60], parmesano:["g",30], gorgonzola:["g",60], qcabra:["g",50], mascarpone:["g",125],
+  pan_rallado:["g",30], avena:["g",50], hojaldre:["ud",1], tortitas:["ud",3], nachos:["g",50], palomitas:["g",40],
+  caldo:["ml",300], triturado:["g",200,150,"V"], frito:["g",100,80,"V"], coco:["ml",200], vino:["ml",50], cafe:["ml",100],
+  aceitunas:["g",30], frutos_secos:["g",30], nueces:["g",25], pesto:["g",40], chocolate:["g",50], harina:["g",30], azucar:["g",20], levadura:["g",5], bizcochos:["ud",6],
+  ketchup:["cda",1], barbacoa:["cda",2], picante:["cdta",1], vinagre:["cda",1], soja:["cda",2], curry:["cdta",2], mayo:["cda",1], miel:["cda",1], mostaza:["cda",1], currorojo:["cda",1], cacao:["cda",1], cacahuete:["cda",1]
+};
+const UNITS = {g:["g","g"], ml:["ml","ml"], ud:["",""], lata:["lata","latas"], loncha:["loncha","lonchas"], rebanada:["rebanada","rebanadas"], placa:["placa","placas"], diente:["diente","dientes"], cda:["cucharada","cucharadas"], cdta:["cucharadita","cucharaditas"], ramita:["ramita","ramitas"]};
+// Unidades que se cuentan por cuartos (media cebolla, un cuarto de lechuga); el resto, enteras
+const QFRAC = new Set(["cebolla","pimiento","tomate","calabacin","berenjena","lechuga","pepino","aguacate","limon","mango","lima","puerro","cebolleta","yogur","burrata","magret","hojaldre","masa_pizza"]);
+// En la compra no se suman: se compra el bote
+const QNOTOT = new Set(["cda","cdta","ramita"]);
+// Especiales, snacks y platos que no encajan en la regla: cantidades de la receta completa, sin ajustar a la ración. "raciones: ingrediente cantidad, …"
+const QX = Object.fromEntries(Object.entries({
+  r217:"1: verd_cong 300, jamon 60, ajo 1, huevos 1",
+  s1:"2: solomillo 400, mostaza 1, miel 1, nata 150, patatas 600, mantequilla 30",
+  s2:"2: arroz 160, champis 250, parmesano 50, vino 100, cebolla 1, mantequilla 30",
+  s3:"2: entrecot 500, patatas 500, cebolla 1, padron 200",
+  s4:"2: muslos 4, limon 1, ajo 6, patatas 600, romero 2",
+  s5:"2: salmon 350, esparragos 250, limon 1, mantequilla 20",
+  s6:"4: lasana 12, picada 500, triturado 400, cebolla 1, leche 500, mantequilla 40, harina 40, mozza 125",
+  s7:"2: gnocchi 500, gorgonzola 100, nata 200, nueces 40",
+  s8:"2: lomo 400, pina 200, tortillas 8, cebolla .5, limon 1",
+  s9:"2: pollo 350, coco 400, currorojo 2, pimiento 1, arroz 160",
+  s10:"2: carrilleras 600, vino 300, cebolla 1, zanahoria 2, patatas 500",
+  s11:"2: picada 300, brioche 2, cebolla 2, qcabra 100, rucula 40",
+  s12:"2: gambas 300, ajo 6, guindilla 1, pan 150",
+  s13:"2: harina 250, levadura 5, triturado 150, mozza 125, jamon 80",
+  s14:"4: patatas 700, huevos 5, cebolla 1",
+  s15:"2: magret 1, frutosrojos 150, miel 1, patatas 500",
+  s16:"2: chocolate 100, mantequilla 80, huevos 2, azucar 60, harina 30",
+  s17:"4: mascarpone 250, bizcochos 12, cafe 200, huevos 2, azucar 50, cacao 1",
+  s18:"2: pulpo 400, patatas 500",
+  s19:"2: costillas 1000, barbacoa 4, miel 2, patatas 500",
+  s20:"2: secreto 400, boniato 500, mantequilla 20, miel 1, mostaza 1",
+  s21:"2: arroz 160, muslos 3, judias 150, pimiento 1, tomate 1, caldo 500",
+  s22:"2: arroz 160, gambas 300, cebolla 1, triturado 100, caldo 700, vino 50",
+  s23:"2: bacalao 350, pimiento 1, calabacin 1, cebolla 1, triturado 200",
+  s24:"2: muslos 4, yogur 1, curry 2, limon .5, arroz 160",
+  s25:"4: picada 500, huevos 1, pan_rallado 50, cebolla 1, vino 100, caldo 300, patatas 600",
+  s26:"2: entrecot 400, tortillas 6, pimiento 1, cebolla 1, aguacate 2, lima 1",
+  s27:"2: noodles 160, lomo 250, huevos 2, caldo 1000, soja 4, cebolleta 1, champis 150",
+  s28:"4: berenjena 2, picada 400, triturado 400, cebolla 1, leche 400, mantequilla 30, harina 30, rallado 60",
+  s29:"2: pasta 180, gambas 250, ajo 4, cherry 200, guindilla 1, vino 50",
+  s30:"6: jamon 150, leche 700, harina 70, mantequilla 70, huevos 2, pan_rallado 100, cebolla .5",
+  s31:"2: pimiento 4, picada 300, arroz 100, cebolla 1, frito 150, rallado 50",
+  s32:"4: hojaldre 1, bacon 150, puerro 2, huevos 3, nata 200, rallado 80",
+  s33:"2: calabaza 700, cebolla 1, qcabra 100, nueces 30, nata 100",
+  s34:"8: qcrema 500, nata 250, huevos 4, azucar 200, harina 10",
+  s35:"8: chocolate 150, mantequilla 120, huevos 3, azucar 150, harina 70, nueces 80",
+  s36:"4: pan 250, leche 500, huevos 2, azucar 80",
+  s37:"4: arroz 100, leche 1000, azucar 80, limon 1",
+  s38:"2: chocolate 100, huevos 3, azucar 30",
+  s39:"2: solomillo 400, ajo 6, caldo 200, patatas 500",
+  s40:"2: muslos 4, ajo 10, vino 150, patatas 500",
+  n1:"1: pan 60, tomate 1", n2:"1: pan 60, aguacate .5, cherry 60", n3:"1: hummus 80, zanahoria 1, pepino .5", n4:"2: garbanzos 400",
+  n5:"1: edamame 150, limon .25", n6:"1: tortitas 3, qfresco 60, tomate .5", n7:"1: tortitas 3, hummus 50, pepino .25", n8:"1: huevos 2",
+  n9:"1: fiambre 4, qcrema 30", n10:"1: nachos 50, rallado 40, aguacate .5, tomate .5", n11:"1: palomitas 40", n12:"1: pan 60, atun 1, tomate .5",
+  n13:"1: cherry 100, mozza 60", n14:"1: boniato 200", n15:"1: patatas 200", n16:"1: tortillas 1, queso 2",
+  n17:"1: aceitunas 30, frutos_secos 30", n18:"1: pan_molde 2, fiambre 3, queso 1", n19:"1: pan 60, jamon 30, tomate .5", n20:"1: pan_molde 2, frito 40, mozza 40",
+  n21:"1: calabacin 1, pan_rallado 40, rallado 20", n22:"1: griego 1, miel 1, frutos_secos 20", n23:"1: yogur 1, fresas 100, avena 30", n24:"1: avena 40, leche 100, yogur .5, platano 1",
+  n25:"1: avena 40, platano 1, huevos 1", n26:"1: manzana 1, cacahuete 1", n27:"1: platano 1, chocolate 20", n28:"1: platano 1, leche 250, avena 20",
+  n29:"1: mango .5, yogur 1", n30:"1: fresas 150, leche 250", n31:"1: pan 60, cacahuete 1, platano 1", n32:"6: avena 150, platano 2, frutos_secos 40",
+  n33:"1: manzana 1, miel 1", n34:"1: fresas 150, griego 1, chocolate 15", n35:"1: tortitas 3, chocolate 30", n36:"1: naranja 1, miel 1",
+  n37:"6: avena 100, cacahuete 2, miel 2, cacao 1", n38:"1: harina 20, huevos 1, azucar 20, cacao 1, leche 45", n39:"1: griego 1, frutosrojos 100, miel 1", n40:"1: qfresco 80, manzana 1, miel 1"
+}).map(([id,s])=>{ const [n,l]=s.split(":"); return [id,[+n,Object.fromEntries(l.split(",").map(x=>{ const [k,v]=x.trim().split(" "); return [k,+v]; }))]]; }));
+const baseServ=r=>QX[r.id]?QX[r.id][0]:1;
+// Cantidad sin redondear de cada ingrediente para n raciones; p = ración del día ({carb, prot})
+function amounts(r,n,p){
+  const x=QX[r.id];
+  if(x) return Object.fromEntries(r.ings.filter(k=>x[1][k]!=null).map(k=>[k,x[1][k]*n/x[0]]));
+  const base=t=>{ let b=null, bp=9; for(const k of r.ings){ const role=QU[k]?.[3]||""; if(role[0]!==t) continue; if(t==="C"&&k!==r.ings[0]&&(role==="C3"?dishType(r)!=="pan":dishType(r)==="verdura")) continue; if(+role[1]<bp){ bp=+role[1]; b=k; } } return b; };
+  // La categoría manda: en un plato de huevo la base es el huevo; en uno de legumbre, la legumbre
+  const mp=r.cat==="huevo"&&r.ings.includes("huevos")?"huevos":r.cat==="legumbre"&&r.ings.find(k=>LEG_I.includes(k))||base("P"), mc=base("C"), out={};
+  for(const k of r.ings){
+    const q=QU[k]; if(!q) continue;
+    const [,main,sec=main,role=""]=q;
+    const v=k===mp?main*p.prot/P0 : k===mc?main*p.carb/C0 : role==="V"&&k===r.ings[0]?main : sec;
+    out[k]=v*n;
+  }
+  return out;
+}
+function roundQ(k,v){
+  const u=QU[k][0];
+  if(u==="g"||u==="ml"){ const s=v<200?5:v<500?10:50; return Math.max(s,Math.round(v/s)*s); }
+  if(u==="ud"&&QFRAC.has(k)) return Math.max(.25,Math.round(v*4)/4);
+  return Math.max(1,Math.round(v));
+}
+const FRAC={.25:"¼",.5:"½",.75:"¾"};
+function fmtQ(k,v){
+  const u=QU[k][0], dec=x=>String(Math.round(x*10)/10).replace(".",",");
+  if(u==="g") return v>=1000?dec(v/1000)+" kg":v+" g";
+  if(u==="ml") return v>=1000?dec(v/1000)+" l":v+" ml";
+  const i=Math.floor(v), f=FRAC[Math.round((v-i)*4)/4]||"", num=i&&f?`${i} ${f}`:f||String(i);
+  return u==="ud"?num:`${num} ${UNITS[u][v>1?1:0]}`;
+}
 let QUICK = [];
 // Recetas propias: viven en S.myRecipes y se mezclan con el recetario fijo en REC
 function syncMine(){
@@ -832,8 +959,19 @@ function score(r, opts={}){
 
 /* ---------- Tarjeta de receta ---------- */
 const missLine=miss=>miss.length?`<span class="miss">Falta: ${esc(miss.map(ingName).join(", "))}</span>`:`<span class="okk">Lo tienes todo</span>`;
-const howTo=r=>`<div class="ings">${r.ings.map(k=>`<span class="ing ${has(k)?"":"miss"}">${esc(ingName(k))}</span>`).join("")}</div>
-  ${r.steps.length?`<ol>${r.steps.map(s=>`<li>${esc(s)}</li>`).join("")}</ol>`:""}${r.tip?`<p class="tip"><b>Para quedar bien:</b> ${esc(r.tip)}</p>`:""}`;
+// Raciones elegidas en cada receta abierta (no se guardan)
+const servs={};
+const todayPortion=()=>portion(S.exercise[(new Date().getDay()+6)%7]);
+const rac=n=>`${n} ${n===1?"ración":"raciones"}`;
+function howTo(r){
+  const n=servs[r.id]||baseServ(r), a=amounts(r,n,todayPortion());
+  const q=k=>a[k]!=null?` <b class="q">${fmtQ(k,roundQ(k,a[k]))}</b>`:"";
+  return `<div class="howto" data-hid="${r.id}">
+  <div class="serv"><span>Para <b>${rac(n)}</b>${QX[r.id]?"":`<span class="muted">, con tu ración de hoy</span>`}</span>
+    <span class="stp"><button class="ico" data-serv="${r.id}" data-sd="-1" aria-label="Una ración menos" ${n<=1?"disabled":""}>−</button><button class="ico" data-serv="${r.id}" data-sd="1" aria-label="Una ración más" ${n>=12?"disabled":""}>+</button></span></div>
+  <div class="ings">${r.ings.map(k=>`<span class="ing ${has(k)?"":"miss"}">${esc(ingName(k))}${q(k)}</span>`).join("")}</div>
+  ${r.steps.length?`<ol>${r.steps.map(s=>`<li>${esc(s)}</li>`).join("")}</ol>`:""}${r.tip?`<p class="tip"><b>Para quedar bien:</b> ${esc(r.tip)}</p>`:""}</div>`;
+}
 // Plato en lista (Cocina con nevera): nombre, lo que falta y minutos; al tocarlo se abren ingredientes y pasos
 function dishRow(r,info,actions){
   const ds=daysSince(r.id);
@@ -1258,12 +1396,20 @@ function renderSemana(){
 }
 
 /* ---------- COMPRA ---------- */
+// Lo que falta: por ingrediente, de qué platos sale y cuánto suma (v=null si algún plato no tiene cantidad)
 function shopList(){
   const need={};
-  S.plan.slots.forEach(s=>{ if(s.on&&s.rid&&!s.done) REC[s.rid].ings.forEach(k=>{ if(!has(k)) (need[k]=need[k]||[]).push(REC[s.rid].name) }) });
-  (S.shopExtra||[]).forEach(x=>{ if(!has(x.k)) (need[x.k]=need[x.k]||[]).push(x.why) });
+  const add=(k,why,v)=>{ const e=need[k]=need[k]||{why:[],v:0}; e.why.push(why); e.v=v==null||e.v==null?null:e.v+v; };
+  S.plan.slots.forEach(s=>{ if(!s.on||!s.rid||s.done) return; const r=REC[s.rid], a=amounts(r,baseServ(r),portion(S.exercise[s.day])); r.ings.forEach(k=>{ if(!has(k)) add(k,r.name,a[k]) }) });
+  (S.shopExtra||[]).forEach(x=>{ if(has(x.k)) return; const r=x.rid&&REC[x.rid]; add(x.k,x.why,r?amounts(r,x.n||baseServ(r),todayPortion())[x.k]:null) });
   return need;
 }
+// Total a comprar: las unidades se redondean hacia arriba (no se compra media cebolla)
+function shopQty(k,e){
+  const u=QU[k]?.[0]; if(e.v==null||!u||QNOTOT.has(u)) return "";
+  return fmtQ(k,u==="g"||u==="ml"?roundQ(k,e.v):Math.ceil(e.v-.01));
+}
+const shopWhy=e=>[...new Set(e.why)].map(w=>{ const c=e.why.filter(x=>x===w).length; return c>1?`${w} (×${c})`:w; }).join(", ");
 const eur=n=>n.toLocaleString("es-ES",{style:"currency",currency:"EUR"});
 const mercaUrl=k=>"https://tienda.mercadona.es/search-results?query="+encodeURIComponent(ingName(k).replace(/\s*\(.*\)/,""));
 function shopGroups(keys){ const byG={}; keys.forEach(k=>{const g=ING[k][1];(byG[g]=byG[g]||[]).push(k)}); return Object.entries(GROUPS).filter(([g])=>byG[g]).map(([g,label])=>[label,byG[g]]); }
@@ -1272,7 +1418,7 @@ function renderCompra(){
   const priced=keys.filter(k=>S.prices[k]>0), total=priced.reduce((a,k)=>a+S.prices[k],0);
   const item=k=>`<li>
     <input type="checkbox" id="sh-${k}" data-buy="${k}" aria-label="Comprado: ${esc(ingName(k))}">
-    <label for="sh-${k}"><b>${esc(ingName(k))}</b><br><span class="small muted">${esc([...new Set(need[k])].join(", "))}</span></label>
+    <label for="sh-${k}"><b>${esc(ingName(k))}</b>${shopQty(k,need[k])?` <span class="sq">${shopQty(k,need[k])}</span>`:""}<br><span class="small muted">${esc(shopWhy(need[k]))}</span></label>
     <div class="price"><input type="number" inputmode="decimal" min="0" step="0.05" id="pr-${k}" data-price="${k}" value="${S.prices[k]||""}" placeholder="€" aria-label="Precio de ${esc(ingName(k))}"><a class="small" href="${mercaUrl(k)}" target="_blank" rel="noopener">Ver en Mercadona</a></div>
   </li>`;
   document.getElementById("view").innerHTML=`
@@ -1306,7 +1452,7 @@ function menuPDF(){
 function compraPDF(){
   const need=shopList(), keys=Object.keys(need), total=keys.reduce((a,k)=>a+(S.prices[k]||0),0);
   printDoc(`<h1>La compra</h1><p class="sub">Para el menú de la semana del ${planWeekStart().getDate()}/${planWeekStart().getMonth()+1}</p>
-    ${shopGroups(keys).map(([label,ks])=>`<h2>${label}</h2><ul>${ks.map(k=>`<li><span class="bx"></span><span>${esc(ingName(k))}</span><span class="pz">${S.prices[k]?eur(S.prices[k]):""}</span></li>`).join("")}</ul>`).join("")}
+    ${shopGroups(keys).map(([label,ks])=>`<h2>${label}</h2><ul>${ks.map(k=>`<li><span class="bx"></span><span>${esc(ingName(k))}${shopQty(k,need[k])?` <b>${shopQty(k,need[k])}</b>`:""}</span><span class="pz">${S.prices[k]?eur(S.prices[k]):""}</span></li>`).join("")}</ul>`).join("")}
     ${total?`<p class="tot">Total estimado: ${eur(total)}</p>`:""}`, "Lista de la compra");
 }
 
@@ -1407,7 +1553,8 @@ document.addEventListener("click",e=>{
   if(d.espv){ espView=d.espv; rq=""; render(); return; }  if(d.redit){ editId=d.redit; formOpen=true; render(); document.getElementById("recipeForm")?.scrollIntoView({behavior:"smooth",block:"start"}); return; }
   if(d.rdel){ const r=REC[d.rdel]; if(!confirm(`¿Borrar «${r.name}» de tus recetas?`)) return; S.myRecipes=S.myRecipes.filter(x=>x.id!==d.rdel); if(editId===d.rdel){editId=null;formOpen=false} syncMine(); persist(); toast("Receta borrada"); render(); return; }
   if(d.ai){ askAI(d.ai); return; }
-  if(d.tobuy){ const r=REC[d.tobuy], miss=r.ings.filter(k=>!has(k)); S.shopExtra=(S.shopExtra||[]).filter(x=>x.why!==r.name).concat(miss.map(k=>({k,why:r.name}))); persist(); toast(miss.length?`${miss.length} ingredientes a la lista`:"Ya lo tienes todo"); return; }
+  if(d.serv){ const r=REC[d.serv]; servs[r.id]=Math.min(12,Math.max(1,(servs[r.id]||baseServ(r))+ +d.sd)); const box=t.closest(".howto"); box.outerHTML=howTo(r); document.querySelector(`.howto[data-hid="${r.id}"] [data-sd="${d.sd}"]`)?.focus(); return; }
+  if(d.tobuy){ const r=REC[d.tobuy], miss=r.ings.filter(k=>!has(k)), n=servs[r.id]||baseServ(r); S.shopExtra=(S.shopExtra||[]).filter(x=>x.why!==r.name).concat(miss.map(k=>({k,why:r.name,rid:r.id,n}))); persist(); toast(miss.length?`${miss.length} ingredientes a la lista`:"Ya lo tienes todo"); return; }
   if(d.must){ toggleMust(d.must); render(); return; }
   if(d.unmust){ S.plan.must=S.plan.must.filter(x=>x!==d.unmust); persist(); render(); return; }
   if(d.ex!=null){ const i=+d.ex; S.exercise[i]=(S.exercise[i]+1)%6; persist(); render(); return; }
@@ -1481,7 +1628,7 @@ document.addEventListener("submit",e=>{
 });
 function markPlanDone(rid){ const s=S.plan.slots.find(x=>x.rid===rid&&!x.done); if(s) s.done=true; }
 async function copyList(){
-  const need=shopList(); const ks=Object.keys(need), tot=ks.reduce((a,k)=>a+(S.prices[k]||0),0); const txt="Lista de la compra\n"+ks.map(k=>"- "+ingName(k)+(S.prices[k]?" ("+eur(S.prices[k])+")":"")).join("\n")+(tot?"\nTotal estimado: "+eur(tot):"");
+  const need=shopList(); const ks=Object.keys(need), tot=ks.reduce((a,k)=>a+(S.prices[k]||0),0); const txt="Lista de la compra\n"+ks.map(k=>"- "+ingName(k)+(shopQty(k,need[k])?": "+shopQty(k,need[k]):"")+(S.prices[k]?" ("+eur(S.prices[k])+")":"")).join("\n")+(tot?"\nTotal estimado: "+eur(tot):"");
   try{ await navigator.clipboard.writeText(txt); toast("Lista copiada"); }
   catch(_){ const ta=document.createElement("textarea"); ta.value=txt; document.body.appendChild(ta); ta.select(); try{document.execCommand("copy");toast("Lista copiada")}catch(__){toast("Selecciona y copia a mano")} ta.remove(); }
 }
