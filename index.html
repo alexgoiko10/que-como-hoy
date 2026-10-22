@@ -319,8 +319,11 @@ input[type=search],input[type=text],input[type=number],input:not([type]){border:
 <div class="toast" id="toast" role="status" hidden></div>
 <div id="print"></div>
 
+<script src="recetas.js"></script>
 <script>
 /* ---------- Datos ---------- */
+// Recetario ampliado (recetas.js). Si no carga, la app funciona con el recetario de este archivo
+const MAS = window.QCH_MAS || {};
 const GROUPS = {prot:"Carne, huevos y proteína", leg:"Legumbres", carb:"Hidratos", veg:"Verdura y fruta", lac:"Lácteos", otros:"Salsas y otros"};
 const ING = {
   pollo:["Pechuga de pollo","prot"], pavo:["Pavo","prot"], picada:["Carne picada","prot"], ternera:["Filete de ternera","prot"], lomo:["Lomo de cerdo","prot"],
@@ -338,13 +341,14 @@ const ING = {
   caldo:["Caldo (brik o pastilla)","otros"], aceitunas:["Aceitunas","otros"], pesto:["Pesto","otros"], ketchup:["Ketchup","otros"], barbacoa:["Salsa barbacoa","otros"], picante:["Salsa picante","otros"], vinagre:["Vinagre","otros"], frutos_secos:["Frutos secos","otros"],
   triturado:["Tomate triturado","otros"], frito:["Tomate frito","otros"], soja:["Salsa de soja","otros"], curry:["Curry","otros"], mayo:["Mayonesa","otros"],
   solomillo:["Solomillo de cerdo","esp"], entrecot:["Entrecot","esp"], muslos:["Muslos de pollo","esp"], salmon:["Salmón","prot"], carrilleras:["Carrilleras","esp"], magret:["Magret de pato","esp"],
-  mantequilla:["Mantequilla","lac"], leche:["Leche","lac"], harina:["Harina","esp"], levadura:["Levadura de panadería","esp"], azucar:["Azúcar","esp"], miel:["Miel","otros"], mostaza:["Mostaza","otros"], vino:["Vino (blanco o tinto)","esp"],
+  mantequilla:["Mantequilla","lac"], leche:["Leche","lac"], harina:["Harina","esp"], levadura:["Levadura (de panadería o química)","esp"], azucar:["Azúcar","esp"], miel:["Miel","otros"], mostaza:["Mostaza","otros"], vino:["Vino (blanco o tinto)","esp"],
   parmesano:["Parmesano","esp"], gorgonzola:["Gorgonzola","esp"], qcabra:["Rulo de cabra","esp"], mascarpone:["Mascarpone","esp"], nueces:["Nueces","esp"], coco:["Leche de coco","esp"], currorojo:["Pasta de curry rojo","esp"],
   esparragos:["Espárragos verdes","esp"], padron:["Pimientos de Padrón","esp"], rucula:["Rúcula","esp"], pina:["Piña","esp"], frutosrojos:["Frutos rojos","esp"], romero:["Romero","esp"], guindilla:["Guindilla","esp"],
   brioche:["Pan brioche","esp"], lasana:["Placas de lasaña","esp"], gnocchi:["Gnocchi","esp"], chocolate:["Chocolate negro","esp"], bizcochos:["Bizcochos de soletilla","esp"], cafe:["Café","esp"], cacao:["Cacao en polvo","esp"],
   bacalao:["Bacalao desalado","prot"], piquillo:["Pimientos del piquillo","veg"], pulpo:["Pulpo cocido","esp"], costillas:["Costillas de cerdo","esp"],
   tortitas:["Tortitas de arroz","carb"], nachos:["Nachos","carb"], palomitas:["Maíz para palomitas","carb"], cacahuete:["Crema de cacahuete","otros"]
 };
+Object.assign(ING, MAS.ing);
 GROUPS.esp = "Para recetas especiales";
 GROUPS.mine = "Añadidos por ti";
 const CATS = {pollo:"Pollo", carne:"Carne", huevo:"Huevo", legumbre:"Legumbre", pescado:"Pescado", pasta:"Pasta", arroz:"Arroz", verdura:"Verdura", postre:"Postre", snack:"Snack"};
@@ -725,6 +729,7 @@ const SN = [
  ["n39","Yogur helado de frutos rojos","d",5,["griego","frutosrojos","miel"],["Bate yogur griego con frutos rojos congelados y miel.","Cómelo al momento como helado suave.","O congélalo 1 h en un táper para que quede más firme."]],
  ["n40","Manzana con queso fresco y miel","d",3,["qfresco","manzana","miel"],["Queso fresco en dados.","Manzana en gajos.","Un hilo de miel por encima: dulce y salado a la vez."]]
 ];
+R.push(...(MAS.R||[])); SP.push(...(MAS.SP||[])); SN.push(...(MAS.SN||[]));
 const REC = Object.fromEntries(R.map(r=>[r[0],{id:r[0],name:r[1],cat:r[2],meal:r[3],min:r[4],ings:r[5],steps:r[6]}]));
 SN.forEach(r=>REC[r[0]]={id:r[0],name:r[1],cat:"snack",meal:"s",sweet:r[2]==="d",min:r[3],ings:r[4],steps:r[5]});
 SP.forEach(r=>REC[r[0]]={id:r[0],name:r[1],cat:r[2],meal:"cn",occ:r[3],min:r[4],ings:r[5],steps:r[6],tip:r[7],special:true});
@@ -760,13 +765,14 @@ const QU = {
   aceitunas:["g",30], frutos_secos:["g",30], nueces:["g",25], pesto:["g",40], chocolate:["g",50], harina:["g",30], azucar:["g",20], levadura:["g",5], bizcochos:["ud",6],
   ketchup:["cda",1], barbacoa:["cda",2], picante:["cdta",1], vinagre:["cda",1], soja:["cda",2], curry:["cdta",2], mayo:["cda",1], miel:["cda",1], mostaza:["cda",1], currorojo:["cda",1], cacao:["cda",1], cacahuete:["cda",1]
 };
+Object.assign(QU, MAS.qu);
 const UNITS = {g:["g","g"], ml:["ml","ml"], ud:["",""], lata:["lata","latas"], loncha:["loncha","lonchas"], rebanada:["rebanada","rebanadas"], placa:["placa","placas"], diente:["diente","dientes"], cda:["cucharada","cucharadas"], cdta:["cucharadita","cucharaditas"], ramita:["ramita","ramitas"]};
 // Unidades que se cuentan por cuartos (media cebolla, un cuarto de lechuga); el resto, enteras
 const QFRAC = new Set(["cebolla","pimiento","tomate","calabacin","berenjena","lechuga","pepino","aguacate","limon","mango","lima","puerro","cebolleta","yogur","burrata","magret","hojaldre","masa_pizza"]);
 // En la compra no se suman: se compra el bote
 const QNOTOT = new Set(["cda","cdta","ramita"]);
 // Especiales, snacks y platos que no encajan en la regla: cantidades de la receta completa, sin ajustar a la ración. "raciones: ingrediente cantidad, …"
-const QX = Object.fromEntries(Object.entries({
+const QX = Object.fromEntries(Object.entries(Object.assign({
   r217:"1: verd_cong 300, jamon 60, ajo 1, huevos 1",
   s1:"2: solomillo 400, mostaza 1, miel 1, nata 150, patatas 600, mantequilla 30",
   s2:"2: arroz 160, champis 250, parmesano 50, vino 100, cebolla 1, mantequilla 30",
@@ -818,7 +824,7 @@ const QX = Object.fromEntries(Object.entries({
   n29:"1: mango .5, yogur 1", n30:"1: fresas 150, leche 250", n31:"1: pan 60, cacahuete 1, platano 1", n32:"6: avena 150, platano 2, frutos_secos 40",
   n33:"1: manzana 1, miel 1", n34:"1: fresas 150, griego 1, chocolate 15", n35:"1: tortitas 3, chocolate 30", n36:"1: naranja 1, miel 1",
   n37:"6: avena 100, cacahuete 2, miel 2, cacao 1", n38:"1: harina 20, huevos 1, azucar 20, cacao 1, leche 45", n39:"1: griego 1, frutosrojos 100, miel 1", n40:"1: qfresco 80, manzana 1, miel 1"
-}).map(([id,s])=>{ const [n,l]=s.split(":"); return [id,[+n,Object.fromEntries(l.split(",").map(x=>{ const [k,v]=x.trim().split(" "); return [k,+v]; }))]]; }));
+}, Object.fromEntries([...(MAS.SP||[]).map(r=>[r[0],r[8]]), ...(MAS.SN||[]).map(r=>[r[0],r[6]])]))).map(([id,s])=>{ const [n,l]=s.split(":"); return [id,[+n,Object.fromEntries(l.split(",").map(x=>{ const [k,v]=x.trim().split(" "); return [k,+v]; }))]]; }));
 const baseServ=r=>QX[r.id]?QX[r.id][0]:1;
 // Cantidad sin redondear de cada ingrediente para n raciones; p = ración del día ({carb, prot})
 function amounts(r,n,p){
